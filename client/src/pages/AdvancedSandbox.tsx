@@ -1,44 +1,30 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
-  Play,
-  Square,
-  Save,
-  Download,
-  Upload,
+  Play, 
+  Square, 
+  Save, 
+  Download, 
+  Upload, 
+  Settings, 
+  FileText,
+  Folder,
   FolderOpen,
-  File,
   Plus,
   X,
-  Terminal,
-  Settings,
-  Maximize2,
-  Minimize2,
-  Code,
-  FileText,
-  Image,
-  Folder,
-  ChevronRight,
-  ChevronDown,
-  Search,
-  Replace,
-  Zap,
-  Bug,
-  GitBranch,
-  Share,
-  Eye,
-  EyeOff,
-  RefreshCw,
   Monitor,
+  Tablet,
   Smartphone,
-  Tablet
+  Eye,
+  Code,
+  Terminal,
+  Maximize2,
+  Minimize2
 } from 'lucide-react';
 
 interface FileNode {
@@ -60,13 +46,16 @@ interface Tab {
   isActive: boolean;
 }
 
+interface ConsoleMessage {
+  type: 'info' | 'error' | 'warning' | 'success' | 'command';
+  message: string;
+  timestamp?: Date;
+}
+
 export function AdvancedSandbox() {
-  const [selectedTemplate, setSelectedTemplate] = useState('react');
-  const [isRunning, setIsRunning] = useState(false);
-  const [activeTab, setActiveTab] = useState('code');
   const [tabs, setTabs] = useState<Tab[]>([
     {
-      id: '1',
+      id: 'App.jsx',
       name: 'App.jsx',
       content: `import React, { useState } from 'react';
 import './App.css';
@@ -98,17 +87,18 @@ export default App;`,
     }
   ]);
   
-  const [activeTabId, setActiveTabId] = useState('1');
-  const [consoleOutput, setConsoleOutput] = useState([
-    { type: 'info', message: 'Welcome to CodeSphere Sandbox!' },
-    { type: 'info', message: 'Ready to code...' }
+  const [activeTabId, setActiveTabId] = useState('App.jsx');
+  const [consoleOutput, setConsoleOutput] = useState<ConsoleMessage[]>([
+    { type: 'info', message: 'Welcome to CodeSphere Sandbox! 🚀' },
+    { type: 'success', message: 'Environment ready for development' }
   ]);
   const [terminalInput, setTerminalInput] = useState('');
   const [previewMode, setPreviewMode] = useState('desktop');
   const [isFileExplorerOpen, setIsFileExplorerOpen] = useState(true);
   const [output, setOutput] = useState('');
-
-  const fileTree: FileNode[] = [
+  const [isRunning, setIsRunning] = useState(false);
+  
+  const [fileTree, setFileTree] = useState<FileNode[]>([
     {
       id: 'root',
       name: 'my-react-app',
@@ -121,7 +111,7 @@ export default App;`,
           type: 'folder',
           isOpen: false,
           children: [
-            { id: 'index.html', name: 'index.html', type: 'file', language: 'html' },
+            { id: 'index.html', name: 'index.html', type: 'file', language: 'html', content: '<!DOCTYPE html>\n<html>\n<head>\n  <title>My App</title>\n</head>\n<body>\n  <div id="root"></div>\n</body>\n</html>' },
             { id: 'favicon.ico', name: 'favicon.ico', type: 'file' }
           ]
         },
@@ -131,437 +121,492 @@ export default App;`,
           type: 'folder',
           isOpen: true,
           children: [
-            { id: 'App.jsx', name: 'App.jsx', type: 'file', language: 'javascript' },
-            { id: 'App.css', name: 'App.css', type: 'file', language: 'css' },
-            { id: 'index.js', name: 'index.js', type: 'file', language: 'javascript' },
-            {
-              id: 'components',
-              name: 'components',
-              type: 'folder',
-              isOpen: false,
-              children: [
-                { id: 'Header.jsx', name: 'Header.jsx', type: 'file', language: 'javascript' },
-                { id: 'Button.jsx', name: 'Button.jsx', type: 'file', language: 'javascript' }
-              ]
-            }
+            { 
+              id: 'App.jsx', 
+              name: 'App.jsx', 
+              type: 'file', 
+              language: 'javascript',
+              content: `import React, { useState } from 'react';
+import './App.css';
+
+function App() {
+  const [count, setCount] = useState(0);
+
+  return (
+    <div className="App">
+      <header className="App-header">
+        <h1>Welcome to CodeSphere Sandbox!</h1>
+        <div className="counter">
+          <button onClick={() => setCount(count - 1)}>-</button>
+          <span className="count">{count}</span>
+          <button onClick={() => setCount(count + 1)}>+</button>
+        </div>
+        <p>
+          Edit <code>src/App.jsx</code> and save to reload.
+        </p>
+      </header>
+    </div>
+  );
+}
+
+export default App;`
+            },
+            { 
+              id: 'App.css', 
+              name: 'App.css', 
+              type: 'file', 
+              language: 'css',
+              content: `.App {
+  text-align: center;
+}
+
+.App-header {
+  background-color: #282c34;
+  padding: 20px;
+  color: white;
+}
+
+.counter {
+  margin: 20px 0;
+}
+
+.counter button {
+  padding: 10px 20px;
+  margin: 0 10px;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.count {
+  font-size: 24px;
+  font-weight: bold;
+  margin: 0 20px;
+}`
+            },
+            { id: 'index.js', name: 'index.js', type: 'file', language: 'javascript', content: 'import React from "react";\nimport ReactDOM from "react-dom";\nimport App from "./App";\n\nReactDOM.render(<App />, document.getElementById("root"));' }
           ]
         },
-        { id: 'package.json', name: 'package.json', type: 'file', language: 'json' },
-        { id: 'README.md', name: 'README.md', type: 'file', language: 'markdown' }
+        { id: 'package.json', name: 'package.json', type: 'file', language: 'json', content: '{\n  "name": "my-react-app",\n  "version": "1.0.0",\n  "dependencies": {\n    "react": "^18.0.0",\n    "react-dom": "^18.0.0"\n  }\n}' },
+        { id: 'README.md', name: 'README.md', type: 'file', language: 'markdown', content: '# My React App\n\nThis is a sample React application created in CodeSphere Sandbox.\n\n## Getting Started\n\n1. Edit files in the src folder\n2. Click Run to see your changes\n3. Experiment and have fun!' }
       ]
     }
-  ];
+  ]);
 
-  const templates = [
-    { id: 'react', name: 'React App', description: 'Modern React application with hooks' },
-    { id: 'vue', name: 'Vue.js App', description: 'Vue 3 application with composition API' },
-    { id: 'angular', name: 'Angular App', description: 'Angular application with TypeScript' },
-    { id: 'vanilla', name: 'Vanilla JS', description: 'Pure HTML, CSS, and JavaScript' },
-    { id: 'node', name: 'Node.js API', description: 'Express.js REST API server' },
-    { id: 'python', name: 'Python Flask', description: 'Flask web application' },
-    { id: 'nextjs', name: 'Next.js', description: 'Full-stack React framework' },
-    { id: 'svelte', name: 'Svelte Kit', description: 'Modern Svelte application' }
-  ];
+  // File manipulation functions
+  const updateFileContent = (fileId: string, newContent: string) => {
+    const updateNodeContent = (nodes: FileNode[]): FileNode[] => {
+      return nodes.map(node => {
+        if (node.id === fileId) {
+          return { ...node, content: newContent };
+        }
+        if (node.children) {
+          return { ...node, children: updateNodeContent(node.children) };
+        }
+        return node;
+      });
+    };
+    
+    setFileTree(updateNodeContent(fileTree));
+    
+    // Also update the corresponding tab
+    setTabs(tabs.map(tab => 
+      tab.id === fileId ? { ...tab, content: newContent, isDirty: true } : tab
+    ));
+  };
 
-  const handleRun = () => {
-    setIsRunning(true);
-    const activeTab = tabs.find(tab => tab.id === activeTabId);
+  const openFile = (fileId: string, fileName: string, content: string = '', language: string = 'javascript') => {
+    const existingTab = tabs.find(tab => tab.id === fileId);
+    if (existingTab) {
+      setActiveTabId(fileId);
+      return;
+    }
+
+    const newTab: Tab = {
+      id: fileId,
+      name: fileName,
+      content: content,
+      language: language,
+      isDirty: false,
+      isActive: false
+    };
+
+    setTabs([...tabs, newTab]);
+    setActiveTabId(fileId);
+  };
+
+  const createNewFile = (parentId: string, fileName: string, type: 'file' | 'folder') => {
+    const newId = `${parentId}_${fileName}_${Date.now()}`;
+    
+    const addToTree = (nodes: FileNode[]): FileNode[] => {
+      return nodes.map(node => {
+        if (node.id === parentId && node.type === 'folder') {
+          const newNode: FileNode = {
+            id: newId,
+            name: fileName,
+            type: type,
+            content: type === 'file' ? '' : undefined,
+            language: fileName.endsWith('.js') || fileName.endsWith('.jsx') ? 'javascript' : 
+                     fileName.endsWith('.css') ? 'css' : 
+                     fileName.endsWith('.html') ? 'html' : 'text',
+            children: type === 'folder' ? [] : undefined,
+            isOpen: type === 'folder' ? false : undefined
+          };
+          
+          return {
+            ...node,
+            children: [...(node.children || []), newNode],
+            isOpen: true
+          };
+        }
+        if (node.children) {
+          return { ...node, children: addToTree(node.children) };
+        }
+        return node;
+      });
+    };
+
+    setFileTree(addToTree(fileTree));
+    
+    if (type === 'file') {
+      const language = fileName.endsWith('.js') || fileName.endsWith('.jsx') ? 'javascript' : 
+                      fileName.endsWith('.css') ? 'css' : 
+                      fileName.endsWith('.html') ? 'html' : 'text';
+      openFile(newId, fileName, '', language);
+    }
     
     setConsoleOutput(prev => [
       ...prev,
-      { type: 'info', message: 'Building application...' },
-      { type: 'success', message: 'Build completed successfully!' },
-      { type: 'info', message: 'Starting development server...' },
-      { type: 'success', message: 'Server running on http://localhost:3000' }
+      { type: 'success', message: `Created ${type}: ${fileName}` }
     ]);
-
-    // Simulate code execution and update preview
-    if (activeTab) {
-      try {
-        // Update the preview with current code changes
-        setOutput('Code executed successfully!');
-        setConsoleOutput(prev => [
-          ...prev,
-          { type: 'success', message: 'Application updated in preview!' }
-        ]);
-      } catch (error) {
-        setConsoleOutput(prev => [
-          ...prev,
-          { type: 'error', message: `Error: ${error}` }
-        ]);
-      }
-    }
-    
-    setTimeout(() => setIsRunning(false), 2000);
   };
 
-  const handleStop = () => {
+  const toggleFolder = (folderId: string) => {
+    const toggleInTree = (nodes: FileNode[]): FileNode[] => {
+      return nodes.map(node => {
+        if (node.id === folderId && node.type === 'folder') {
+          return { ...node, isOpen: !node.isOpen };
+        }
+        if (node.children) {
+          return { ...node, children: toggleInTree(node.children) };
+        }
+        return node;
+      });
+    };
+    
+    setFileTree(toggleInTree(fileTree));
+  };
+
+  const runCode = () => {
+    setIsRunning(true);
+    const activeTab = tabs.find(tab => tab.id === activeTabId);
+    if (!activeTab) return;
+
+    setConsoleOutput(prev => [
+      ...prev,
+      { type: 'info', message: '🚀 Building and running your code...' },
+      { type: 'success', message: '✅ Compilation successful!' },
+      { type: 'info', message: '📦 Starting development server...' },
+      { type: 'success', message: '🌐 App running at http://localhost:3000' }
+    ]);
+
+    // Simulate code execution
+    setTimeout(() => {
+      setOutput('Your React app is running! Check the preview panel.');
+      setConsoleOutput(prev => [
+        ...prev,
+        { type: 'success', message: '✨ Ready for development!' }
+      ]);
+      setIsRunning(false);
+    }, 2000);
+  };
+
+  const stopCode = () => {
     setIsRunning(false);
     setConsoleOutput(prev => [
       ...prev,
-      { type: 'warning', message: 'Stopping development server...' },
-      { type: 'info', message: 'Server stopped.' }
+      { type: 'warning', message: '🛑 Development server stopped' }
     ]);
   };
 
-  const handleTerminalCommand = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      const command = terminalInput.trim();
-      setConsoleOutput(prev => [
-        ...prev,
-        { type: 'command', message: `$ ${command}` }
-      ]);
-      
-      // Simulate command execution
-      setTimeout(() => {
-        if (command === 'npm install') {
-          setConsoleOutput(prev => [
-            ...prev,
-            { type: 'info', message: 'Installing dependencies...' },
-            { type: 'success', message: 'Dependencies installed successfully!' }
-          ]);
-        } else if (command === 'npm test') {
-          setConsoleOutput(prev => [
-            ...prev,
-            { type: 'info', message: 'Running tests...' },
-            { type: 'success', message: 'All tests passed!' }
-          ]);
-        } else if (command.startsWith('git')) {
-          setConsoleOutput(prev => [
-            ...prev,
-            { type: 'success', message: 'Git command executed successfully.' }
-          ]);
-        } else {
-          setConsoleOutput(prev => [
-            ...prev,
-            { type: 'error', message: `Command not found: ${command}` }
-          ]);
-        }
-      }, 500);
-      
-      setTerminalInput('');
+  const executeTerminalCommand = (command: string) => {
+    if (!command.trim()) return;
+
+    setConsoleOutput(prev => [
+      ...prev,
+      { type: 'command', message: `$ ${command}` }
+    ]);
+
+    // Simulate different commands
+    setTimeout(() => {
+      if (command.includes('npm install')) {
+        setConsoleOutput(prev => [
+          ...prev,
+          { type: 'info', message: 'Installing dependencies...' },
+          { type: 'success', message: 'Dependencies installed successfully!' }
+        ]);
+      } else if (command.includes('ls')) {
+        setConsoleOutput(prev => [
+          ...prev,
+          { type: 'info', message: 'public/  src/  package.json  README.md' }
+        ]);
+      } else if (command.includes('git')) {
+        setConsoleOutput(prev => [
+          ...prev,
+          { type: 'success', message: 'Git command executed successfully!' }
+        ]);
+      } else {
+        setConsoleOutput(prev => [
+          ...prev,
+          { type: 'info', message: `Command executed: ${command}` }
+        ]);
+      }
+    }, 500);
+
+    setTerminalInput('');
+  };
+
+  const closeTab = (tabId: string) => {
+    const filteredTabs = tabs.filter(tab => tab.id !== tabId);
+    setTabs(filteredTabs);
+    if (activeTabId === tabId && filteredTabs.length > 0) {
+      setActiveTabId(filteredTabs[0].id);
     }
   };
 
-  const renderFileTree = (nodes: FileNode[], level = 0) => {
-    return nodes.map((node) => (
-      <div key={node.id} style={{ marginLeft: `${level * 16}px` }}>
-        <div className="flex items-center space-x-1 py-1 px-2 hover:bg-muted/50 cursor-pointer text-sm">
+  const renderFileTree = (nodes: FileNode[], depth = 0) => {
+    return nodes.map(node => (
+      <div key={node.id} style={{ marginLeft: depth * 16 }}>
+        <div
+          className="flex items-center space-x-2 py-1 px-2 hover:bg-muted cursor-pointer rounded"
+          onClick={() => {
+            if (node.type === 'folder') {
+              toggleFolder(node.id);
+            } else if (node.content !== undefined) {
+              openFile(node.id, node.name, node.content, node.language || 'text');
+            }
+          }}
+        >
           {node.type === 'folder' ? (
-            <>
-              {node.isOpen ? (
-                <ChevronDown className="h-3 w-3" />
-              ) : (
-                <ChevronRight className="h-3 w-3" />
-              )}
-              <Folder className="h-4 w-4 text-blue-500" />
-            </>
+            node.isOpen ? <FolderOpen className="h-4 w-4" /> : <Folder className="h-4 w-4" />
           ) : (
-            <>
-              <div className="w-3" />
-              {node.language === 'javascript' ? (
-                <Code className="h-4 w-4 text-yellow-500" />
-              ) : node.language === 'css' ? (
-                <FileText className="h-4 w-4 text-blue-500" />
-              ) : node.language === 'html' ? (
-                <FileText className="h-4 w-4 text-orange-500" />
-              ) : (
-                <File className="h-4 w-4 text-gray-500" />
-              )}
-            </>
+            <FileText className="h-4 w-4" />
           )}
-          <span className="flex-1">{node.name}</span>
+          <span className="text-sm">{node.name}</span>
         </div>
         {node.type === 'folder' && node.isOpen && node.children && (
           <div>
-            {renderFileTree(node.children, level + 1)}
+            {renderFileTree(node.children, depth + 1)}
           </div>
         )}
       </div>
     ));
   };
 
-  const closeTab = (tabId: string) => {
-    const newTabs = tabs.filter(tab => tab.id !== tabId);
-    setTabs(newTabs);
-    if (activeTabId === tabId && newTabs.length > 0) {
-      setActiveTabId(newTabs[0].id);
-    }
-  };
-
-  const getConsoleTypeColor = (type: string) => {
-    switch (type) {
-      case 'error': return 'text-red-400';
-      case 'warning': return 'text-yellow-400';
-      case 'success': return 'text-green-400';
-      case 'command': return 'text-blue-400';
-      default: return 'text-muted-foreground';
-    }
-  };
-
-  const activeTabData = tabs.find(tab => tab.id === activeTabId);
+  const activeTab = tabs.find(tab => tab.id === activeTabId);
 
   return (
-    <div className="h-[calc(100vh-4rem)] flex flex-col bg-background">
-      {/* Toolbar */}
-      <div className="flex items-center justify-between p-2 border-b border-border bg-muted/30">
-        <div className="flex items-center space-x-2">
-          <Select value={selectedTemplate} onValueChange={setSelectedTemplate}>
-            <SelectTrigger className="w-48">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {templates.map((template) => (
-                <SelectItem key={template.id} value={template.id}>
-                  {template.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          
-          <Button
-            onClick={isRunning ? handleStop : handleRun}
+    <div className="max-w-7xl mx-auto space-y-6">
+      {/* Header */}
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold mb-2">Advanced Sandbox</h1>
+          <p className="text-muted-foreground">
+            Full-featured code editor with live preview and terminal
+          </p>
+        </div>
+        <div className="flex space-x-2">
+          <Button 
+            onClick={runCode} 
             disabled={isRunning}
             className="bg-green-600 hover:bg-green-700"
           >
-            {isRunning ? (
-              <>
-                <Square className="mr-2 h-4 w-4" />
-                Stop
-              </>
-            ) : (
-              <>
-                <Play className="mr-2 h-4 w-4" />
-                Run
-              </>
-            )}
+            <Play className="h-4 w-4 mr-2" />
+            {isRunning ? 'Running...' : 'Run'}
           </Button>
-        </div>
-
-        <div className="flex items-center space-x-2">
-          <Button variant="ghost" size="sm">
-            <Save className="mr-2 h-4 w-4" />
+          <Button 
+            variant="outline" 
+            onClick={stopCode}
+            disabled={!isRunning}
+          >
+            <Square className="h-4 w-4 mr-2" />
+            Stop
+          </Button>
+          <Button variant="outline">
+            <Save className="h-4 w-4 mr-2" />
             Save
-          </Button>
-          <Button variant="ghost" size="sm">
-            <Download className="mr-2 h-4 w-4" />
-            Export
-          </Button>
-          <Button variant="ghost" size="sm">
-            <Share className="mr-2 h-4 w-4" />
-            Share
-          </Button>
-          <Button variant="ghost" size="sm">
-            <Settings className="h-4 w-4" />
           </Button>
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="flex-1 flex overflow-hidden">
+      <div className="grid grid-cols-12 gap-6 h-[800px]">
         {/* File Explorer */}
         {isFileExplorerOpen && (
-          <div className="w-64 border-r border-border bg-muted/20 flex flex-col">
-            <div className="p-2 border-b border-border flex items-center justify-between">
-              <span className="text-sm font-semibold">Explorer</span>
-              <div className="flex items-center space-x-1">
-                <Button variant="ghost" size="sm">
-                  <Plus className="h-3 w-3" />
-                </Button>
-                <Button variant="ghost" size="sm">
-                  <FolderOpen className="h-3 w-3" />
-                </Button>
-              </div>
-            </div>
-            <ScrollArea className="flex-1">
-              <div className="p-1">
+          <div className="col-span-3">
+            <Card className="h-full">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-lg">Explorer</CardTitle>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => createNewFile('src', 'newFile.js', 'file')}
+                  >
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent className="overflow-y-auto">
                 {renderFileTree(fileTree)}
-              </div>
-            </ScrollArea>
+              </CardContent>
+            </Card>
           </div>
         )}
 
-        {/* Code Editor and Preview */}
-        <div className="flex-1 flex flex-col">
-          {/* Tabs */}
-          <div className="flex items-center border-b border-border bg-muted/30">
-            <div className="flex items-center">
-              {tabs.map((tab) => (
-                <div
-                  key={tab.id}
-                  className={`flex items-center space-x-2 px-3 py-2 border-r border-border cursor-pointer ${
-                    activeTabId === tab.id ? 'bg-background' : 'hover:bg-muted/50'
-                  }`}
-                  onClick={() => setActiveTabId(tab.id)}
-                >
-                  <Code className="h-3 w-3" />
-                  <span className="text-sm">{tab.name}</span>
-                  {tab.isDirty && <div className="w-1 h-1 bg-orange-500 rounded-full" />}
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      closeTab(tab.id);
-                    }}
-                    className="hover:bg-muted rounded-full p-0.5"
+        {/* Code Editor */}
+        <div className={`${isFileExplorerOpen ? 'col-span-5' : 'col-span-8'}`}>
+          <Card className="h-full flex flex-col">
+            <CardHeader className="pb-3">
+              <div className="flex items-center space-x-2 overflow-x-auto">
+                {tabs.map(tab => (
+                  <div
+                    key={tab.id}
+                    className={`flex items-center space-x-2 px-3 py-1 rounded cursor-pointer ${
+                      tab.id === activeTabId 
+                        ? 'bg-primary text-primary-foreground' 
+                        : 'bg-muted hover:bg-muted/80'
+                    }`}
+                    onClick={() => setActiveTabId(tab.id)}
                   >
-                    <X className="h-3 w-3" />
-                  </button>
-                </div>
-              ))}
-            </div>
-            <div className="flex-1" />
-            <div className="flex items-center space-x-2 px-2">
-              <Button variant="ghost" size="sm">
-                <Search className="h-3 w-3" />
-              </Button>
-              <Button variant="ghost" size="sm">
-                <Replace className="h-3 w-3" />
-              </Button>
-            </div>
-          </div>
-
-          {/* Main Content Area */}
-          <div className="flex-1 flex">
-            {/* Code Editor */}
-            <div className="flex-1 flex flex-col">
-              <div className="flex-1 p-4 font-mono text-sm bg-muted/10">
-                <pre className="whitespace-pre-wrap text-foreground leading-relaxed">
-                  {activeTabData?.content}
-                </pre>
-              </div>
-            </div>
-
-            {/* Live Preview */}
-            <div className="w-1/2 border-l border-border flex flex-col">
-              <div className="p-2 border-b border-border flex items-center justify-between bg-muted/30">
-                <span className="text-sm font-semibold">Live Preview</span>
-                <div className="flex items-center space-x-2">
-                  <div className="flex items-center space-x-1">
-                    <Button
-                      variant={previewMode === 'desktop' ? 'default' : 'ghost'}
-                      size="sm"
-                      onClick={() => setPreviewMode('desktop')}
+                    <span className="text-sm whitespace-nowrap">{tab.name}</span>
+                    {tab.isDirty && <div className="w-1 h-1 bg-orange-500 rounded-full"></div>}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        closeTab(tab.id);
+                      }}
+                      className="ml-1 hover:bg-destructive rounded p-0.5"
                     >
-                      <Monitor className="h-3 w-3" />
-                    </Button>
-                    <Button
-                      variant={previewMode === 'tablet' ? 'default' : 'ghost'}
-                      size="sm"
-                      onClick={() => setPreviewMode('tablet')}
-                    >
-                      <Tablet className="h-3 w-3" />
-                    </Button>
-                    <Button
-                      variant={previewMode === 'mobile' ? 'default' : 'ghost'}
-                      size="sm"
-                      onClick={() => setPreviewMode('mobile')}
-                    >
-                      <Smartphone className="h-3 w-3" />
-                    </Button>
-                  </div>
-                  <Button variant="ghost" size="sm">
-                    <RefreshCw className="h-3 w-3" />
-                  </Button>
-                </div>
-              </div>
-              
-              <div className="flex-1 bg-white flex items-center justify-center">
-                <div className={`bg-gray-50 border border-gray-200 ${
-                  previewMode === 'mobile' ? 'w-80 h-96' :
-                  previewMode === 'tablet' ? 'w-96 h-80' :
-                  'w-full h-full'
-                } rounded-lg overflow-hidden`}>
-                  <div className="h-full flex flex-col items-center justify-center p-8 text-gray-800">
-                    <h1 className="text-2xl font-bold mb-4">Welcome to CodeSphere Sandbox!</h1>
-                    <div className="flex items-center space-x-4 mb-4">
-                      <button className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
-                        -
-                      </button>
-                      <span className="text-xl font-mono">0</span>
-                      <button className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
-                        +
-                      </button>
-                    </div>
-                    <p className="text-gray-600 text-center">
-                      Edit <code className="bg-gray-200 px-1 rounded">src/App.jsx</code> and save to reload.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Bottom Panel - Console/Terminal */}
-      <div className="h-48 border-t border-border bg-muted/10">
-        <Tabs defaultValue="console">
-          <div className="flex items-center justify-between border-b border-border px-2">
-            <TabsList className="h-8">
-              <TabsTrigger value="console" className="text-xs">Console</TabsTrigger>
-              <TabsTrigger value="terminal" className="text-xs">Terminal</TabsTrigger>
-              <TabsTrigger value="problems" className="text-xs">Problems</TabsTrigger>
-              <TabsTrigger value="output" className="text-xs">Output</TabsTrigger>
-            </TabsList>
-            <Button variant="ghost" size="sm">
-              <X className="h-3 w-3" />
-            </Button>
-          </div>
-          
-          <TabsContent value="console" className="m-0 h-40">
-            <ScrollArea className="h-full">
-              <div className="p-2 font-mono text-xs space-y-1">
-                {consoleOutput.map((output, index) => (
-                  <div key={index} className={`${getConsoleTypeColor(output.type)}`}>
-                    {output.message}
+                      <X className="h-3 w-3" />
+                    </button>
                   </div>
                 ))}
               </div>
-            </ScrollArea>
-          </TabsContent>
-          
-          <TabsContent value="terminal" className="m-0 h-40">
-            <div className="h-full flex flex-col">
-              <ScrollArea className="flex-1">
-                <div className="p-2 font-mono text-xs space-y-1">
-                  {consoleOutput.filter(output => output.type === 'command' || output.type === 'info').map((output, index) => (
-                    <div key={index} className={`${getConsoleTypeColor(output.type)}`}>
-                      {output.message}
+            </CardHeader>
+            <CardContent className="flex-1 p-0">
+              {activeTab ? (
+                <Textarea
+                  value={activeTab.content}
+                  onChange={(e) => updateFileContent(activeTab.id, e.target.value)}
+                  className="w-full h-full resize-none border-0 font-mono text-sm"
+                  placeholder="Start coding..."
+                />
+              ) : (
+                <div className="flex items-center justify-center h-full text-muted-foreground">
+                  <div className="text-center">
+                    <Code className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p>Open a file to start coding</p>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Preview Panel */}
+        <div className="col-span-4">
+          <Card className="h-full flex flex-col">
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-lg">Preview</CardTitle>
+                <div className="flex space-x-1">
+                  <Button
+                    variant={previewMode === 'desktop' ? 'default' : 'ghost'}
+                    size="sm"
+                    onClick={() => setPreviewMode('desktop')}
+                  >
+                    <Monitor className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant={previewMode === 'tablet' ? 'default' : 'ghost'}
+                    size="sm"
+                    onClick={() => setPreviewMode('tablet')}
+                  >
+                    <Tablet className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant={previewMode === 'mobile' ? 'default' : 'ghost'}
+                    size="sm"
+                    onClick={() => setPreviewMode('mobile')}
+                  >
+                    <Smartphone className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="flex-1 p-0">
+              <div className={`h-full bg-white rounded-lg border-2 border-dashed border-muted-foreground/20 flex items-center justify-center ${
+                previewMode === 'mobile' ? 'max-w-sm mx-auto' : 
+                previewMode === 'tablet' ? 'max-w-md mx-auto' : ''
+              }`}>
+                <div className="text-center p-8">
+                  <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg mx-auto mb-4 flex items-center justify-center">
+                    <span className="text-white font-bold text-2xl">CS</span>
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-800 mb-2">Welcome to CodeSphere!</h3>
+                  <p className="text-gray-600 mb-4">Your React app is running perfectly</p>
+                  <div className="bg-gray-100 rounded-lg p-4 mb-4">
+                    <div className="flex justify-center space-x-4">
+                      <button className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">-</button>
+                      <span className="text-2xl font-bold text-gray-800">0</span>
+                      <button className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">+</button>
                     </div>
-                  ))}
-                </div>
-              </ScrollArea>
-              <div className="border-t border-border p-2">
-                <div className="flex items-center space-x-2 font-mono text-xs">
-                  <span className="text-green-400">$</span>
-                  <Input
-                    value={terminalInput}
-                    onChange={(e) => setTerminalInput(e.target.value)}
-                    onKeyPress={handleTerminalCommand}
-                    placeholder="Type a command..."
-                    className="flex-1 border-0 bg-transparent text-xs focus:ring-0"
-                  />
+                  </div>
+                  <p className="text-sm text-gray-500">Edit src/App.jsx and save to reload</p>
                 </div>
               </div>
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="problems" className="m-0 h-40">
-            <div className="p-2 text-xs">
-              <div className="flex items-center space-x-2 text-muted-foreground">
-                <Bug className="h-4 w-4" />
-                <span>No problems detected</span>
-              </div>
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="output" className="m-0 h-40">
-            <div className="p-2 text-xs">
-              <div className="text-muted-foreground">Build output will appear here...</div>
-            </div>
-          </TabsContent>
-        </Tabs>
+            </CardContent>
+          </Card>
+        </div>
       </div>
+
+      {/* Terminal */}
+      <Card>
+        <CardHeader className="pb-3">
+          <div className="flex items-center space-x-2">
+            <Terminal className="h-5 w-5" />
+            <CardTitle className="text-lg">Terminal</CardTitle>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="bg-black text-green-400 p-4 rounded-lg font-mono text-sm h-48 overflow-y-auto">
+            {consoleOutput.map((msg, index) => (
+              <div key={index} className={`mb-1 ${
+                msg.type === 'error' ? 'text-red-400' :
+                msg.type === 'warning' ? 'text-yellow-400' :
+                msg.type === 'success' ? 'text-green-400' :
+                msg.type === 'command' ? 'text-blue-400' :
+                'text-gray-300'
+              }`}>
+                {msg.message}
+              </div>
+            ))}
+            <div className="flex items-center">
+              <span className="text-green-400 mr-2">$</span>
+              <Input
+                value={terminalInput}
+                onChange={(e) => setTerminalInput(e.target.value)}
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter') {
+                    executeTerminalCommand(terminalInput);
+                  }
+                }}
+                className="bg-transparent border-0 text-green-400 font-mono focus:ring-0 p-0"
+                placeholder="Type a command..."
+              />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

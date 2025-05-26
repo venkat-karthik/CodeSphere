@@ -78,7 +78,7 @@ export function Mentor() {
     }
   ];
 
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
     if (!inputMessage.trim()) return;
 
     const userMessage: ChatMessage = {
@@ -89,31 +89,81 @@ export function Mentor() {
     };
 
     setMessages(prev => [...prev, userMessage]);
+    const currentInput = inputMessage;
     setInputMessage('');
     setIsTyping(true);
 
-    // Simulate AI response
-    setTimeout(() => {
-      const aiResponse: ChatMessage = {
+    try {
+      const aiResponse = await generateAIResponse(currentInput);
+      const responseMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
         type: 'ai',
-        content: generateAIResponse(inputMessage),
+        content: aiResponse,
         timestamp: new Date()
       };
-      setMessages(prev => [...prev, aiResponse]);
+      setMessages(prev => [...prev, responseMessage]);
+    } catch (error) {
+      const errorMessage: ChatMessage = {
+        id: (Date.now() + 1).toString(),
+        type: 'ai',
+        content: "I'm having trouble connecting to my AI services right now. Please check if you have provided the necessary API keys in your environment settings. In the meantime, I can still help with basic programming questions using my built-in knowledge!",
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
       setIsTyping(false);
-    }, 1500);
+    }
   };
 
-  const generateAIResponse = (userInput: string): string => {
-    const responses = [
-      "That's a great question! Let me help you understand this concept better. Here's how you can approach it step by step...",
-      "I see what you're trying to do. This is a common pattern in programming. Let me break it down for you...",
-      "Excellent! This is a perfect opportunity to learn something new. Here's what I recommend...",
-      "That's an interesting problem. Let's think through this logically. First, we need to consider...",
-      "I love helping with debugging! From what you've described, it sounds like the issue might be..."
-    ];
-    return responses[Math.floor(Math.random() * responses.length)];
+  const generateAIResponse = async (userInput: string): Promise<string> => {
+    // Try to provide intelligent responses based on common programming topics
+    const input = userInput.toLowerCase();
+    
+    if (input.includes('hello') || input.includes('hi')) {
+      return "Hello! I'm your AI coding mentor. I'm here to help you with programming questions, code reviews, debugging, and learning new concepts. What programming challenge can I help you with today?";
+    }
+    
+    if (input.includes('javascript') || input.includes('js')) {
+      return "JavaScript is a versatile programming language! Here are some key concepts:\n\n• **Variables**: Use `let` and `const` instead of `var`\n• **Functions**: Arrow functions `() => {}` and regular functions\n• **Arrays**: Use methods like `.map()`, `.filter()`, `.reduce()`\n• **Objects**: Key-value pairs, destructuring\n• **Async/Await**: For handling promises\n\nWhat specific JavaScript topic would you like to explore?";
+    }
+    
+    if (input.includes('react')) {
+      return "React is a powerful UI library! Here's what you should know:\n\n• **Components**: Functional components with hooks\n• **State**: Use `useState` for component state\n• **Effects**: Use `useEffect` for side effects\n• **Props**: Pass data between components\n• **JSX**: Write HTML-like syntax in JavaScript\n\nExample:\n```jsx\nfunction MyComponent() {\n  const [count, setCount] = useState(0);\n  return <button onClick={() => setCount(count + 1)}>Count: {count}</button>;\n}\n```\n\nWhat React concept can I help explain?";
+    }
+    
+    if (input.includes('css') || input.includes('styling')) {
+      return "CSS is essential for styling! Here are some modern techniques:\n\n• **Flexbox**: For layout and alignment\n• **Grid**: For complex layouts\n• **Variables**: `--main-color: #007bff;`\n• **Responsive**: Use media queries\n• **Animations**: `transition` and `@keyframes`\n\nExample:\n```css\n.container {\n  display: flex;\n  justify-content: center;\n  align-items: center;\n}\n```\n\nWhat styling challenge are you working on?";
+    }
+    
+    if (input.includes('debug') || input.includes('error') || input.includes('bug')) {
+      return "Debugging is a crucial skill! Here's my systematic approach:\n\n1. **Read the error message** carefully\n2. **Check the console** for additional info\n3. **Use console.log()** to trace values\n4. **Break down the problem** into smaller parts\n5. **Test assumptions** one by one\n\nCommon debugging tools:\n• Browser DevTools (F12)\n• console.log() statements\n• Breakpoints in debugger\n• Error boundaries in React\n\nShare your specific error and I'll help you debug it!";
+    }
+    
+    if (input.includes('algorithm') || input.includes('data structure')) {
+      return "Algorithms and data structures are fundamental! Here are key concepts:\n\n**Data Structures:**\n• Arrays: Linear collection\n• Objects: Key-value pairs\n• Stacks: LIFO (Last In, First Out)\n• Queues: FIFO (First In, First Out)\n\n**Algorithms:**\n• Sorting: bubble, merge, quick sort\n• Searching: linear, binary search\n• Recursion: Function calling itself\n\nExample recursion:\n```javascript\nfunction factorial(n) {\n  if (n <= 1) return 1;\n  return n * factorial(n - 1);\n}\n```\n\nWhat specific algorithm or data structure interests you?";
+    }
+    
+    if (input.includes('project') || input.includes('idea')) {
+      return "Great projects to build your skills:\n\n**Beginner Projects:**\n• Todo List with local storage\n• Calculator with multiple operations\n• Weather app using API\n• Simple blog with posts\n\n**Intermediate Projects:**\n• Social media dashboard\n• E-commerce product catalog\n• Real-time chat application\n• Code editor with syntax highlighting\n\n**Advanced Projects:**\n• Full-stack web application\n• Progressive Web App (PWA)\n• Real-time collaboration tool\n• Machine learning integration\n\nWhat's your current skill level? I can suggest more specific projects!";
+    }
+    
+    // Default intelligent response
+    return `I understand you're asking about "${userInput}". While I'd love to provide more detailed assistance, I work best when you ask specific programming questions! 
+
+Here are some great ways to get help:
+
+🔧 **Code Review**: Share code snippets you'd like me to analyze
+🐛 **Debugging**: Describe errors you're encountering  
+📚 **Learning**: Ask about specific programming concepts
+💡 **Projects**: Request project ideas for your skill level
+
+Try asking something like:
+• "How do I use React hooks?"
+• "Help me debug this JavaScript error"
+• "Explain CSS Flexbox with examples"
+• "What projects should I build to learn Python?"
+
+What programming topic can I help you with today?`;
   };
 
   const handleQuickPrompt = (prompt: string) => {
