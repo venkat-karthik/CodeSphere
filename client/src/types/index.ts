@@ -3,6 +3,7 @@ export interface User {
   firstName: string;
   lastName: string;
   email: string;
+  role: 'admin' | 'student';
   level: number;
   xp: number;
   nextLevelXP: number;
@@ -96,6 +97,7 @@ export interface Post {
 
 export type Section = 
   | 'dashboard' 
+  | 'admin-dashboard'
   | 'roadmaps' 
   | 'resources' 
   | 'videos' 

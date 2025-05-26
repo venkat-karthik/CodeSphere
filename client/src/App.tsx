@@ -25,6 +25,8 @@ function App() {
     switch (currentSection) {
       case 'dashboard':
         return <Dashboard onSectionChange={setCurrentSection} />;
+      case 'admin-dashboard':
+        return <AdminDashboard />;
       case 'roadmaps':
         return <Roadmaps />;
       case 'resources':

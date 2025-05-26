@@ -14,9 +14,12 @@ import {
   X,
   Menu,
   Flame,
-  Star
+  Star,
+  Shield,
+  BarChart3
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
+import { useUserRole } from '../contexts/UserRoleContext';
 import { ThemeToggle } from './ThemeToggle';
 import { Section } from '../types';
 import { Button } from '@/components/ui/button';
@@ -29,9 +32,24 @@ interface SidebarProps {
 
 export function Sidebar({ currentSection, onSectionChange, onAuthModalOpen }: SidebarProps) {
   const { isAuthenticated, user, logout } = useAuth();
+  const { isAdmin, isStudent } = useUserRole();
   const [isCollapsed, setIsCollapsed] = useState(false);
 
-  const navigation = [
+  const adminNavigation = [
+    { id: 'dashboard' as Section, icon: Home, label: 'Student Dashboard' },
+    { id: 'admin-dashboard' as Section, icon: Shield, label: 'Admin Dashboard', adminOnly: true },
+    { id: 'roadmaps' as Section, icon: Route, label: 'Learning Roadmaps' },
+    { id: 'resources' as Section, icon: FileText, label: 'PDF Resources' },
+    { id: 'videos' as Section, icon: Play, label: 'Video Library' },
+    { id: 'problems' as Section, icon: Puzzle, label: 'Daily Problems' },
+    { id: 'community' as Section, icon: Users, label: 'Community Lounge' },
+    { id: 'studio' as Section, icon: Code, label: 'Project Studio' },
+    { id: 'sandbox' as Section, icon: Code, label: 'App Sandbox' },
+    { id: 'mentor' as Section, icon: Bot, label: 'AI Mentor' },
+    { id: 'sphere-map' as Section, icon: Star, label: 'Sphere Map' }
+  ];
+
+  const studentNavigation = [
     { id: 'dashboard' as Section, icon: Home, label: 'Dashboard' },
     { id: 'roadmaps' as Section, icon: Route, label: 'Learning Roadmaps' },
     { id: 'resources' as Section, icon: FileText, label: 'PDF Resources' },
@@ -43,6 +61,8 @@ export function Sidebar({ currentSection, onSectionChange, onAuthModalOpen }: Si
     { id: 'mentor' as Section, icon: Bot, label: 'AI Mentor' },
     { id: 'sphere-map' as Section, icon: Star, label: 'Sphere Map' }
   ];
+
+  const navigation = isAdmin ? adminNavigation : studentNavigation;
 
   const bottomNavigation = [
     { id: 'profile' as Section, icon: User, label: 'Profile' },
