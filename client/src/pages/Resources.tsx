@@ -105,11 +105,143 @@ export function Resources() {
             Browse and download educational documents
           </p>
         </div>
-        <Button className="bg-primary hover:bg-primary/90">
-          <Upload className="mr-2 h-4 w-4" />
-          Upload PDF
-        </Button>
+        {isAdmin && (
+          <Button onClick={() => setShowUploadModal(true)} className="bg-primary hover:bg-primary/90">
+            <Upload className="mr-2 h-4 w-4" />
+            Upload PDF
+          </Button>
+        )}
       </div>
+
+      {/* Admin Upload Modal */}
+      {isAdmin && showUploadModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <Card className="w-full max-w-md">
+            <CardHeader>
+              <div className="flex justify-between items-center">
+                <CardTitle>Upload New PDF</CardTitle>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowUploadModal(false)}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <label className="text-sm font-medium">Title</label>
+                <Input
+                  value={newPdf.title}
+                  onChange={(e) => setNewPdf(prev => ({ ...prev, title: e.target.value }))}
+                  placeholder="Enter PDF title"
+                />
+              </div>
+              
+              <div>
+                <label className="text-sm font-medium">Description</label>
+                <Textarea
+                  value={newPdf.description}
+                  onChange={(e) => setNewPdf(prev => ({ ...prev, description: e.target.value }))}
+                  placeholder="Enter PDF description"
+                  rows={3}
+                />
+              </div>
+              
+              <div>
+                <label className="text-sm font-medium">Category</label>
+                <Select value={newPdf.category} onValueChange={(value) => setNewPdf(prev => ({ ...prev, category: value }))}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="javascript">JavaScript</SelectItem>
+                    <SelectItem value="react">React</SelectItem>
+                    <SelectItem value="nodejs">Node.js</SelectItem>
+                    <SelectItem value="css">CSS</SelectItem>
+                    <SelectItem value="html">HTML</SelectItem>
+                    <SelectItem value="python">Python</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div>
+                <label className="text-sm font-medium">Difficulty</label>
+                <Select value={newPdf.difficulty} onValueChange={(value: any) => setNewPdf(prev => ({ ...prev, difficulty: value }))}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="beginner">Beginner</SelectItem>
+                    <SelectItem value="intermediate">Intermediate</SelectItem>
+                    <SelectItem value="advanced">Advanced</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div>
+                <label className="text-sm font-medium">Tags (comma-separated)</label>
+                <Input
+                  value={newPdf.tags}
+                  onChange={(e) => setNewPdf(prev => ({ ...prev, tags: e.target.value }))}
+                  placeholder="fundamentals, guide, reference"
+                />
+              </div>
+              
+              <div className="flex space-x-2">
+                <Button onClick={() => fileInputRef.current?.click()} className="flex-1" disabled={isUploading}>
+                  {isUploading ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      Uploading...
+                    </>
+                  ) : (
+                    <>
+                      <File className="h-4 w-4 mr-2" />
+                      Select PDF File
+                    </>
+                  )}
+                </Button>
+                <Button variant="outline" onClick={() => setShowUploadModal(false)}>
+                  Cancel
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          if (file && file.type === 'application/pdf') {
+            setIsUploading(true);
+            setTimeout(() => {
+              const newPdfData = {
+                id: Date.now(),
+                title: newPdf.title || file.name.replace(/\.[^/.]+$/, ""),
+                description: newPdf.description,
+                category: newPdf.category || 'javascript',
+                difficulty: newPdf.difficulty,
+                downloadCount: 0,
+                uploadDate: new Date().toISOString(),
+                size: '2.4 MB',
+                pages: 45
+              };
+              
+              setPdfs(prev => [newPdfData, ...prev]);
+              setIsUploading(false);
+              setShowUploadModal(false);
+              setNewPdf({ title: '', description: '', category: '', difficulty: 'beginner', tags: '' });
+            }, 2000);
+          }
+        }}
+        accept=".pdf"
+        className="hidden"
+      />
 
       {/* Search and Filters */}
       <Card>

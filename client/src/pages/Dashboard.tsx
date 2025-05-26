@@ -39,7 +39,7 @@ export function Dashboard({ onSectionChange }: DashboardProps) {
           
           {/* Feature highlights */}
           <div className="grid md:grid-cols-3 gap-6 mt-12">
-            <Card className="card-hover">
+            <Card className="card-hover cursor-pointer" onClick={() => onSectionChange('roadmaps')}>
               <CardContent className="p-6 text-center">
                 <div className="w-12 h-12 bg-primary/20 rounded-lg flex items-center justify-center mx-auto mb-4">
                   <BookOpen className="h-6 w-6 text-primary" />
@@ -51,7 +51,7 @@ export function Dashboard({ onSectionChange }: DashboardProps) {
               </CardContent>
             </Card>
             
-            <Card className="card-hover">
+            <Card className="card-hover cursor-pointer" onClick={() => onSectionChange('problems')}>
               <CardContent className="p-6 text-center">
                 <div className="w-12 h-12 bg-primary/20 rounded-lg flex items-center justify-center mx-auto mb-4">
                   <Target className="h-6 w-6 text-primary" />
@@ -63,7 +63,7 @@ export function Dashboard({ onSectionChange }: DashboardProps) {
               </CardContent>
             </Card>
             
-            <Card className="card-hover">
+            <Card className="card-hover cursor-pointer" onClick={() => onSectionChange('community')}>
               <CardContent className="p-6 text-center">
                 <div className="w-12 h-12 bg-primary/20 rounded-lg flex items-center justify-center mx-auto mb-4">
                   <Users className="h-6 w-6 text-primary" />
