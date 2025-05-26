@@ -4,6 +4,7 @@ import { useAuth } from '../hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { LoginInstructions } from './LoginInstructions';
 
 interface AuthModalsProps {
   isOpen: boolean;
@@ -114,6 +115,8 @@ export function AuthModals({ isOpen, mode, onClose, onSwitchMode }: AuthModalsPr
               <h2 className="text-2xl font-bold mb-2">Welcome Back</h2>
               <p className="text-muted-foreground">Sign in to your CodeSphere account</p>
             </div>
+
+            <LoginInstructions />
 
             <form onSubmit={handleLogin} className="space-y-4">
               <div>
