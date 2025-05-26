@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { AuthProvider } from './hooks/useAuth';
+import { ThemeProvider } from './contexts/ThemeContext';
 import { Layout } from './components/Layout';
 import { Dashboard } from './pages/Dashboard';
 import { Roadmaps } from './pages/Roadmaps';
@@ -50,14 +51,16 @@ function App() {
   };
 
   return (
-    <AuthProvider>
-      <Layout 
-        currentSection={currentSection} 
-        onSectionChange={setCurrentSection}
-      >
-        {renderSection()}
-      </Layout>
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <Layout 
+          currentSection={currentSection} 
+          onSectionChange={setCurrentSection}
+        >
+          {renderSection()}
+        </Layout>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
 

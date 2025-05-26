@@ -17,6 +17,7 @@ import {
   Star
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
+import { ThemeToggle } from './ThemeToggle';
 import { Section } from '../types';
 import { Button } from '@/components/ui/button';
 
@@ -173,6 +174,11 @@ export function Sidebar({ currentSection, onSectionChange, onAuthModalOpen }: Si
                 </button>
               ))}
             </nav>
+          </div>
+
+          {/* Theme Toggle */}
+          <div className="flex justify-center mb-4">
+            <ThemeToggle />
           </div>
 
           {/* Auth Buttons / Logout */}
