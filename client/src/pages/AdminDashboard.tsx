@@ -50,6 +50,38 @@ interface AnalyticsData {
 export function AdminDashboard() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTab, setSelectedTab] = useState('overview');
+  const [selectedTimeframe, setSelectedTimeframe] = useState('7d');
+  
+  const companyGrowthData = [
+    { month: 'Jan', revenue: 12000, students: 150, courses: 8 },
+    { month: 'Feb', revenue: 15000, students: 200, courses: 12 },
+    { month: 'Mar', revenue: 18000, students: 280, courses: 15 },
+    { month: 'Apr', revenue: 22000, students: 350, courses: 18 },
+    { month: 'May', revenue: 28000, students: 420, courses: 22 },
+    { month: 'Jun', revenue: 35000, students: 520, courses: 28 }
+  ];
+
+  const exportAnalytics = () => {
+    const csvData = [
+      ['Metric', 'Value'],
+      ['Total Students', '520'],
+      ['Active Students', '384'],
+      ['Average Study Time', '4.2 hours'],
+      ['Course Completion Rate', '78%'],
+      ['Monthly Revenue', '$35,000'],
+      ['Student Satisfaction', '4.8/5'],
+      ['Platform Uptime', '99.9%']
+    ];
+    
+    const csvContent = csvData.map(row => row.join(',')).join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `codesphere-analytics-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+  };
 
   // Mock student data - in real app this would come from your database
   const students: Student[] = [
@@ -134,7 +166,7 @@ export function AdminDashboard() {
           </p>
         </div>
         <div className="flex space-x-2">
-          <Button variant="outline">
+          <Button variant="outline" onClick={exportAnalytics}>
             <Download className="mr-2 h-4 w-4" />
             Export Data
           </Button>
@@ -145,7 +177,52 @@ export function AdminDashboard() {
         </div>
       </div>
 
-      {/* Analytics Overview */}
+      {/* Company Growth Overview */}
+      <Card className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 border-blue-200 dark:border-blue-800">
+        <CardHeader>
+          <CardTitle className="flex items-center space-x-2">
+            <TrendingUp className="h-5 w-5 text-blue-600" />
+            <span>CodeSphere Business Growth</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid md:grid-cols-3 gap-6">
+            <div className="text-center">
+              <div className="text-3xl font-bold text-green-600 mb-1">$35,000</div>
+              <div className="text-sm text-muted-foreground">Monthly Revenue</div>
+              <div className="text-xs text-green-500 mt-1">+27% from last month</div>
+            </div>
+            <div className="text-center">
+              <div className="text-3xl font-bold text-blue-600 mb-1">520</div>
+              <div className="text-sm text-muted-foreground">Total Students</div>
+              <div className="text-xs text-blue-500 mt-1">+85 new this month</div>
+            </div>
+            <div className="text-center">
+              <div className="text-3xl font-bold text-purple-600 mb-1">28</div>
+              <div className="text-sm text-muted-foreground">Active Courses</div>
+              <div className="text-xs text-purple-500 mt-1">6 launched recently</div>
+            </div>
+          </div>
+          
+          <div className="mt-6 p-4 bg-white dark:bg-gray-800 rounded-lg">
+            <h4 className="font-semibold mb-3">6-Month Growth Trend</h4>
+            <div className="space-y-2">
+              {companyGrowthData.map((data, index) => (
+                <div key={data.month} className="flex items-center justify-between">
+                  <span className="text-sm">{data.month}</span>
+                  <div className="flex space-x-4 text-sm">
+                    <span className="text-green-600">${data.revenue.toLocaleString()}</span>
+                    <span className="text-blue-600">{data.students} students</span>
+                    <span className="text-purple-600">{data.courses} courses</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Student Analytics Overview */}
       <div className="grid md:grid-cols-4 gap-6">
         <Card>
           <CardContent className="p-6">
