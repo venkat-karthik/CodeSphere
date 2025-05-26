@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, timestamp, json } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, json, decimal, varchar } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -8,9 +8,17 @@ export const users = pgTable("users", {
   lastName: text("last_name").notNull(),
   email: text("email").notNull().unique(),
   password: text("password").notNull(),
+  role: text("role").notNull().default("student"), // 'admin' or 'student'
   level: integer("level").notNull().default(1),
   xp: integer("xp").notNull().default(0),
   streak: integer("streak").notNull().default(0),
+  theme: text("theme").notNull().default("dark"), // 'dark' or 'light'
+  profileImage: text("profile_image"),
+  bio: text("bio"),
+  subscriptionType: text("subscription_type").notNull().default("free"), // 'free', 'premium', 'pro'
+  subscriptionExpiry: timestamp("subscription_expiry"),
+  studyPattern: json("study_pattern"), // Track daily study patterns
+  totalStudyTime: integer("total_study_time").notNull().default(0), // in minutes
   joinDate: timestamp("join_date").notNull().defaultNow(),
   preferences: json("preferences"),
 });
@@ -85,6 +93,66 @@ export const communityPosts = pgTable("community_posts", {
   replies: integer("replies").notNull().default(0),
   isResolved: boolean("is_resolved").notNull().default(false),
   createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const communityChannels = pgTable("community_channels", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description"),
+  type: text("type").notNull().default("text"), // 'text', 'voice', 'general'
+  creatorId: integer("creator_id").notNull(),
+  isPrivate: boolean("is_private").notNull().default(false),
+  memberCount: integer("member_count").notNull().default(0),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const channelMessages = pgTable("channel_messages", {
+  id: serial("id").primaryKey(),
+  channelId: integer("channel_id").notNull(),
+  userId: integer("user_id").notNull(),
+  content: text("content").notNull(),
+  messageType: text("message_type").notNull().default("text"), // 'text', 'file', 'image'
+  attachments: json("attachments").default([]),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const payments = pgTable("payments", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  currency: text("currency").notNull().default("USD"),
+  subscriptionType: text("subscription_type").notNull(),
+  paymentMethod: text("payment_method").notNull(),
+  status: text("status").notNull().default("pending"), // 'pending', 'completed', 'failed'
+  transactionId: text("transaction_id"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const projects = pgTable("projects", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  name: text("name").notNull(),
+  description: text("description"),
+  type: text("type").notNull(), // 'custom', 'template', 'ai-generated'
+  language: text("language").notNull(),
+  framework: text("framework"),
+  sourceCode: json("source_code"), // Store HTML, CSS, JS
+  isPublic: boolean("is_public").notNull().default(false),
+  likes: integer("likes").notNull().default(0),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const studentAnalytics = pgTable("student_analytics", {
+  id: serial("id").primaryKey(),
+  studentId: integer("student_id").notNull(),
+  date: timestamp("date").notNull().defaultNow(),
+  studyTimeMinutes: integer("study_time_minutes").notNull().default(0),
+  problemsAttempted: integer("problems_attempted").notNull().default(0),
+  problemsSolved: integer("problems_solved").notNull().default(0),
+  videosWatched: integer("videos_watched").notNull().default(0),
+  resourcesAccessed: integer("resources_accessed").notNull().default(0),
+  xpEarned: integer("xp_earned").notNull().default(0),
 });
 
 export const insertUserSchema = createInsertSchema(users).omit({
