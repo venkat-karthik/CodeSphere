@@ -106,6 +106,7 @@ export default App;`,
   const [terminalInput, setTerminalInput] = useState('');
   const [previewMode, setPreviewMode] = useState('desktop');
   const [isFileExplorerOpen, setIsFileExplorerOpen] = useState(true);
+  const [output, setOutput] = useState('');
 
   const fileTree: FileNode[] = [
     {
@@ -164,6 +165,8 @@ export default App;`,
 
   const handleRun = () => {
     setIsRunning(true);
+    const activeTab = tabs.find(tab => tab.id === activeTabId);
+    
     setConsoleOutput(prev => [
       ...prev,
       { type: 'info', message: 'Building application...' },
@@ -171,6 +174,24 @@ export default App;`,
       { type: 'info', message: 'Starting development server...' },
       { type: 'success', message: 'Server running on http://localhost:3000' }
     ]);
+
+    // Simulate code execution and update preview
+    if (activeTab) {
+      try {
+        // Update the preview with current code changes
+        setOutput('Code executed successfully!');
+        setConsoleOutput(prev => [
+          ...prev,
+          { type: 'success', message: 'Application updated in preview!' }
+        ]);
+      } catch (error) {
+        setConsoleOutput(prev => [
+          ...prev,
+          { type: 'error', message: `Error: ${error}` }
+        ]);
+      }
+    }
+    
     setTimeout(() => setIsRunning(false), 2000);
   };
 

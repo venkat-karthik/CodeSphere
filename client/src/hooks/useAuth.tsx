@@ -21,11 +21,48 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
-      const users = storage.getAllUsers();
-      const user = users.find(u => u.email === email);
+      // Demo accounts for easy testing
+      let user: User | null = null;
+      
+      if (email === 'admin@codesphere.com' && password === 'admin123') {
+        // Admin account
+        user = {
+          id: 'admin1',
+          firstName: 'Admin',
+          lastName: 'User',
+          email,
+          role: 'admin',
+          joinDate: new Date().toISOString(),
+          level: 10,
+          xp: 5000,
+          nextLevelXP: 10000,
+          streak: 30,
+          completedCourses: 15,
+          problemsSolved: 200
+        };
+      } else if (email === 'student@codesphere.com' && password === 'student123') {
+        // Student account
+        user = {
+          id: 'student1',
+          firstName: 'Student',
+          lastName: 'User',
+          email,
+          role: 'student',
+          joinDate: new Date().toISOString(),
+          level: 5,
+          xp: 1250,
+          nextLevelXP: 2000,
+          streak: 7,
+          completedCourses: 3,
+          problemsSolved: 45
+        };
+      } else {
+        // Check existing users
+        const users = storage.getAllUsers();
+        user = users.find(u => u.email === email) || null;
+      }
       
       if (user) {
-        // In a real app, you'd verify the password hash
         storage.setAuthState(true);
         storage.setCurrentUser(user);
         setAuthState({ isAuthenticated: true, user });
