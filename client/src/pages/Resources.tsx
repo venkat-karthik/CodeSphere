@@ -1,23 +1,47 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useAuth } from '@/hooks/useAuth';
+import { useUserRole } from '@/contexts/UserRoleContext';
 import { 
   FileText, 
   Download, 
   Search, 
   Filter,
-  Upload
+  Upload,
+  Plus,
+  X,
+  File,
+  Calendar,
+  Eye,
+  Star,
+  Clock
 } from 'lucide-react';
 import { storage } from '../lib/storage';
 
 export function Resources() {
+  const { user } = useAuth();
+  const { isAdmin } = useUserRole();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [sortBy, setSortBy] = useState('newest');
+  const [isUploading, setIsUploading] = useState(false);
+  const [showUploadModal, setShowUploadModal] = useState(false);
+  const [newPdf, setNewPdf] = useState({
+    title: '',
+    description: '',
+    category: '',
+    difficulty: 'beginner' as 'beginner' | 'intermediate' | 'advanced',
+    tags: ''
+  });
   
-  const pdfs = storage.getPDFs();
+  const [pdfs, setPdfs] = useState(storage.getPDFs());
   
   const categories = [
     { id: 'all', label: 'All', count: pdfs.length },

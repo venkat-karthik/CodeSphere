@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { 
   Play, 
   Square, 
@@ -24,7 +25,17 @@ import {
   Code,
   Terminal,
   Maximize2,
-  Minimize2
+  Minimize2,
+  Search,
+  GitBranch,
+  Package,
+  Bug,
+  Layers,
+  Command,
+  ChevronRight,
+  ChevronDown,
+  Circle,
+  Dot
 } from 'lucide-react';
 
 interface FileNode {
@@ -89,7 +100,7 @@ export default App;`,
   
   const [activeTabId, setActiveTabId] = useState('App.jsx');
   const [consoleOutput, setConsoleOutput] = useState<ConsoleMessage[]>([
-    { type: 'info', message: 'Welcome to CodeSphere Sandbox! 🚀' },
+    { type: 'info', message: 'Welcome to CodeSphere IDE! 🚀' },
     { type: 'success', message: 'Environment ready for development' }
   ]);
   const [terminalInput, setTerminalInput] = useState('');
@@ -97,6 +108,12 @@ export default App;`,
   const [isFileExplorerOpen, setIsFileExplorerOpen] = useState(true);
   const [output, setOutput] = useState('');
   const [isRunning, setIsRunning] = useState(false);
+  const [sidebarTab, setSidebarTab] = useState('explorer');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedLanguage, setSelectedLanguage] = useState('javascript');
+  const [showMinimap, setShowMinimap] = useState(true);
+  const [fontSize, setFontSize] = useState(14);
+  const [wordWrap, setWordWrap] = useState(false);
   
   const [fileTree, setFileTree] = useState<FileNode[]>([
     {
