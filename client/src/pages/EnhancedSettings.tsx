@@ -1,0 +1,1018 @@
+import { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Separator } from '@/components/ui/separator';
+import { Textarea } from '@/components/ui/textarea';
+import { useTheme } from '../contexts/ThemeContext';
+import { useUserRole } from '../contexts/UserRoleContext';
+import { 
+  User, 
+  Bell, 
+  Shield, 
+  Palette, 
+  Globe, 
+  Keyboard, 
+  Download, 
+  Trash2,
+  Save,
+  Eye,
+  EyeOff,
+  Camera,
+  CreditCard,
+  Settings,
+  Monitor,
+  Sun,
+  Moon,
+  Volume2,
+  VolumeX,
+  Smartphone,
+  Mail,
+  MessageSquare,
+  Zap
+} from 'lucide-react';
+
+export function EnhancedSettings() {
+  const { theme, setTheme } = useTheme();
+  const { isAdmin } = useUserRole();
+  
+  const [profile, setProfile] = useState({
+    firstName: 'John',
+    lastName: 'Doe',
+    email: 'john.doe@example.com',
+    bio: 'Passionate developer learning new technologies every day.',
+    location: 'San Francisco, CA',
+    website: 'https://johndoe.dev',
+    github: 'johndoe',
+    linkedin: 'johndoe',
+    twitter: 'johndoe'
+  });
+
+  const [preferences, setPreferences] = useState({
+    language: 'en',
+    timezone: 'America/Los_Angeles',
+    dateFormat: 'MM/DD/YYYY',
+    codeTheme: 'dark',
+    fontSize: 'medium',
+    autoSave: true,
+    showLineNumbers: true,
+    wordWrap: true,
+    minimap: true,
+    soundEffects: true,
+    animations: true,
+    compactMode: false
+  });
+
+  const [notifications, setNotifications] = useState({
+    emailNotifications: true,
+    pushNotifications: true,
+    desktopNotifications: true,
+    weeklyDigest: true,
+    courseUpdates: true,
+    communityMessages: true,
+    achievementAlerts: true,
+    reminderNotifications: true,
+    marketingEmails: false
+  });
+
+  const [privacy, setPrivacy] = useState({
+    profileVisibility: 'public',
+    showProgress: true,
+    showAchievements: true,
+    showActivity: true,
+    allowDirectMessages: true,
+    showOnlineStatus: true,
+    dataCollection: true
+  });
+
+  const [security, setSecurity] = useState({
+    twoFactorEnabled: false,
+    sessionTimeout: 'auto',
+    loginAlerts: true,
+    passwordLastChanged: '2024-01-15',
+    activeSessions: 3
+  });
+
+  const handleSaveProfile = () => {
+    console.log('Saving profile:', profile);
+    // Here you would typically save to your backend
+  };
+
+  const handleSavePreferences = () => {
+    console.log('Saving preferences:', preferences);
+  };
+
+  const handleSaveNotifications = () => {
+    console.log('Saving notifications:', notifications);
+  };
+
+  const handleSavePrivacy = () => {
+    console.log('Saving privacy settings:', privacy);
+  };
+
+  const handleSaveSecurity = () => {
+    console.log('Saving security settings:', security);
+  };
+
+  return (
+    <div className="max-w-5xl mx-auto space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold">Settings</h1>
+          <p className="text-muted-foreground">
+            Customize your CodeSphere experience
+          </p>
+        </div>
+        <Button>
+          <Save className="mr-2 h-4 w-4" />
+          Save All Changes
+        </Button>
+      </div>
+
+      <Tabs defaultValue="profile" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-6">
+          <TabsTrigger value="profile">Profile</TabsTrigger>
+          <TabsTrigger value="preferences">Preferences</TabsTrigger>
+          <TabsTrigger value="notifications">Notifications</TabsTrigger>
+          <TabsTrigger value="privacy">Privacy</TabsTrigger>
+          <TabsTrigger value="security">Security</TabsTrigger>
+          <TabsTrigger value="billing">Billing</TabsTrigger>
+        </TabsList>
+
+        {/* Profile Settings */}
+        <TabsContent value="profile" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <User className="h-5 w-5" />
+                <span>Profile Information</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Profile Picture */}
+              <div className="flex items-center space-x-4">
+                <div className="w-20 h-20 bg-primary rounded-full flex items-center justify-center text-primary-foreground text-2xl font-bold">
+                  {profile.firstName[0]}{profile.lastName[0]}
+                </div>
+                <div className="space-y-2">
+                  <Button size="sm">
+                    <Camera className="mr-2 h-4 w-4" />
+                    Change Photo
+                  </Button>
+                  <p className="text-xs text-muted-foreground">
+                    JPG, PNG or GIF. Max size 2MB.
+                  </p>
+                </div>
+              </div>
+
+              <Separator />
+
+              {/* Basic Info */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="firstName">First Name</Label>
+                  <Input
+                    id="firstName"
+                    value={profile.firstName}
+                    onChange={(e) => setProfile({ ...profile, firstName: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="lastName">Last Name</Label>
+                  <Input
+                    id="lastName"
+                    value={profile.lastName}
+                    onChange={(e) => setProfile({ ...profile, lastName: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="email">Email Address</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={profile.email}
+                  onChange={(e) => setProfile({ ...profile, email: e.target.value })}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="bio">Bio</Label>
+                <Textarea
+                  id="bio"
+                  placeholder="Tell us about yourself..."
+                  value={profile.bio}
+                  onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
+                  rows={3}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="location">Location</Label>
+                  <Input
+                    id="location"
+                    placeholder="City, Country"
+                    value={profile.location}
+                    onChange={(e) => setProfile({ ...profile, location: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="website">Website</Label>
+                  <Input
+                    id="website"
+                    placeholder="https://yourwebsite.com"
+                    value={profile.website}
+                    onChange={(e) => setProfile({ ...profile, website: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              {/* Social Links */}
+              <div className="space-y-4">
+                <h4 className="font-semibold">Social Links</h4>
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="github">GitHub</Label>
+                    <Input
+                      id="github"
+                      placeholder="username"
+                      value={profile.github}
+                      onChange={(e) => setProfile({ ...profile, github: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="linkedin">LinkedIn</Label>
+                    <Input
+                      id="linkedin"
+                      placeholder="username"
+                      value={profile.linkedin}
+                      onChange={(e) => setProfile({ ...profile, linkedin: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="twitter">Twitter</Label>
+                    <Input
+                      id="twitter"
+                      placeholder="username"
+                      value={profile.twitter}
+                      onChange={(e) => setProfile({ ...profile, twitter: e.target.value })}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex justify-end">
+                <Button onClick={handleSaveProfile}>
+                  Save Profile Changes
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Preferences */}
+        <TabsContent value="preferences" className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* General Preferences */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <Settings className="h-5 w-5" />
+                  <span>General</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Language</Label>
+                  <Select value={preferences.language} onValueChange={(value) => setPreferences({ ...preferences, language: value })}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="en">English</SelectItem>
+                      <SelectItem value="es">Spanish</SelectItem>
+                      <SelectItem value="fr">French</SelectItem>
+                      <SelectItem value="de">German</SelectItem>
+                      <SelectItem value="pt">Portuguese</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Timezone</Label>
+                  <Select value={preferences.timezone} onValueChange={(value) => setPreferences({ ...preferences, timezone: value })}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="America/Los_Angeles">Pacific Time</SelectItem>
+                      <SelectItem value="America/Denver">Mountain Time</SelectItem>
+                      <SelectItem value="America/Chicago">Central Time</SelectItem>
+                      <SelectItem value="America/New_York">Eastern Time</SelectItem>
+                      <SelectItem value="Europe/London">GMT</SelectItem>
+                      <SelectItem value="Europe/Paris">CET</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Date Format</Label>
+                  <Select value={preferences.dateFormat} onValueChange={(value) => setPreferences({ ...preferences, dateFormat: value })}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="MM/DD/YYYY">MM/DD/YYYY</SelectItem>
+                      <SelectItem value="DD/MM/YYYY">DD/MM/YYYY</SelectItem>
+                      <SelectItem value="YYYY-MM-DD">YYYY-MM-DD</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Appearance */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <Palette className="h-5 w-5" />
+                  <span>Appearance</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-3">
+                  <Label>Theme</Label>
+                  <div className="grid grid-cols-3 gap-2">
+                    <Button
+                      variant={theme === 'light' ? 'default' : 'outline'}
+                      onClick={() => setTheme('light')}
+                      className="flex flex-col items-center space-y-2 h-auto py-3"
+                    >
+                      <Sun className="h-4 w-4" />
+                      <span className="text-xs">Light</span>
+                    </Button>
+                    <Button
+                      variant={theme === 'dark' ? 'default' : 'outline'}
+                      onClick={() => setTheme('dark')}
+                      className="flex flex-col items-center space-y-2 h-auto py-3"
+                    >
+                      <Moon className="h-4 w-4" />
+                      <span className="text-xs">Dark</span>
+                    </Button>
+                    <Button
+                      variant={theme === 'system' ? 'default' : 'outline'}
+                      onClick={() => setTheme('system' as any)}
+                      className="flex flex-col items-center space-y-2 h-auto py-3"
+                    >
+                      <Monitor className="h-4 w-4" />
+                      <span className="text-xs">System</span>
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Font Size</Label>
+                  <Select value={preferences.fontSize} onValueChange={(value) => setPreferences({ ...preferences, fontSize: value })}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="small">Small</SelectItem>
+                      <SelectItem value="medium">Medium</SelectItem>
+                      <SelectItem value="large">Large</SelectItem>
+                      <SelectItem value="extra-large">Extra Large</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="animations">Animations</Label>
+                    <Switch
+                      id="animations"
+                      checked={preferences.animations}
+                      onCheckedChange={(checked) => setPreferences({ ...preferences, animations: checked })}
+                    />
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="soundEffects">Sound Effects</Label>
+                    <Switch
+                      id="soundEffects"
+                      checked={preferences.soundEffects}
+                      onCheckedChange={(checked) => setPreferences({ ...preferences, soundEffects: checked })}
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="compactMode">Compact Mode</Label>
+                    <Switch
+                      id="compactMode"
+                      checked={preferences.compactMode}
+                      onCheckedChange={(checked) => setPreferences({ ...preferences, compactMode: checked })}
+                    />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Code Editor */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <Keyboard className="h-5 w-5" />
+                  <span>Code Editor</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Editor Theme</Label>
+                  <Select value={preferences.codeTheme} onValueChange={(value) => setPreferences({ ...preferences, codeTheme: value })}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="dark">Dark</SelectItem>
+                      <SelectItem value="light">Light</SelectItem>
+                      <SelectItem value="high-contrast">High Contrast</SelectItem>
+                      <SelectItem value="monokai">Monokai</SelectItem>
+                      <SelectItem value="github">GitHub</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="autoSave">Auto Save</Label>
+                    <Switch
+                      id="autoSave"
+                      checked={preferences.autoSave}
+                      onCheckedChange={(checked) => setPreferences({ ...preferences, autoSave: checked })}
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="showLineNumbers">Line Numbers</Label>
+                    <Switch
+                      id="showLineNumbers"
+                      checked={preferences.showLineNumbers}
+                      onCheckedChange={(checked) => setPreferences({ ...preferences, showLineNumbers: checked })}
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="wordWrap">Word Wrap</Label>
+                    <Switch
+                      id="wordWrap"
+                      checked={preferences.wordWrap}
+                      onCheckedChange={(checked) => setPreferences({ ...preferences, wordWrap: checked })}
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="minimap">Minimap</Label>
+                    <Switch
+                      id="minimap"
+                      checked={preferences.minimap}
+                      onCheckedChange={(checked) => setPreferences({ ...preferences, minimap: checked })}
+                    />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="flex justify-end">
+            <Button onClick={handleSavePreferences}>
+              Save Preferences
+            </Button>
+          </div>
+        </TabsContent>
+
+        {/* Notifications */}
+        <TabsContent value="notifications" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <Bell className="h-5 w-5" />
+                <span>Notification Settings</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <h4 className="font-semibold">Communication</h4>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        <Mail className="h-4 w-4" />
+                        <Label htmlFor="emailNotifications">Email Notifications</Label>
+                      </div>
+                      <Switch
+                        id="emailNotifications"
+                        checked={notifications.emailNotifications}
+                        onCheckedChange={(checked) => setNotifications({ ...notifications, emailNotifications: checked })}
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        <Smartphone className="h-4 w-4" />
+                        <Label htmlFor="pushNotifications">Push Notifications</Label>
+                      </div>
+                      <Switch
+                        id="pushNotifications"
+                        checked={notifications.pushNotifications}
+                        onCheckedChange={(checked) => setNotifications({ ...notifications, pushNotifications: checked })}
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        <Monitor className="h-4 w-4" />
+                        <Label htmlFor="desktopNotifications">Desktop Notifications</Label>
+                      </div>
+                      <Switch
+                        id="desktopNotifications"
+                        checked={notifications.desktopNotifications}
+                        onCheckedChange={(checked) => setNotifications({ ...notifications, desktopNotifications: checked })}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <h4 className="font-semibold">Content Updates</h4>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="courseUpdates">Course Updates</Label>
+                      <Switch
+                        id="courseUpdates"
+                        checked={notifications.courseUpdates}
+                        onCheckedChange={(checked) => setNotifications({ ...notifications, courseUpdates: checked })}
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="communityMessages">Community Messages</Label>
+                      <Switch
+                        id="communityMessages"
+                        checked={notifications.communityMessages}
+                        onCheckedChange={(checked) => setNotifications({ ...notifications, communityMessages: checked })}
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="achievementAlerts">Achievement Alerts</Label>
+                      <Switch
+                        id="achievementAlerts"
+                        checked={notifications.achievementAlerts}
+                        onCheckedChange={(checked) => setNotifications({ ...notifications, achievementAlerts: checked })}
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="reminderNotifications">Study Reminders</Label>
+                      <Switch
+                        id="reminderNotifications"
+                        checked={notifications.reminderNotifications}
+                        onCheckedChange={(checked) => setNotifications({ ...notifications, reminderNotifications: checked })}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <Separator />
+
+              <div className="space-y-3">
+                <h4 className="font-semibold">Email Preferences</h4>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="weeklyDigest">Weekly Progress Digest</Label>
+                  <Switch
+                    id="weeklyDigest"
+                    checked={notifications.weeklyDigest}
+                    onCheckedChange={(checked) => setNotifications({ ...notifications, weeklyDigest: checked })}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="marketingEmails">Marketing Emails</Label>
+                  <Switch
+                    id="marketingEmails"
+                    checked={notifications.marketingEmails}
+                    onCheckedChange={(checked) => setNotifications({ ...notifications, marketingEmails: checked })}
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end">
+                <Button onClick={handleSaveNotifications}>
+                  Save Notification Settings
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Privacy */}
+        <TabsContent value="privacy" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <Shield className="h-5 w-5" />
+                <span>Privacy & Visibility</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Profile Visibility</Label>
+                  <Select value={privacy.profileVisibility} onValueChange={(value) => setPrivacy({ ...privacy, profileVisibility: value })}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="public">Public</SelectItem>
+                      <SelectItem value="friends">Friends Only</SelectItem>
+                      <SelectItem value="private">Private</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-3">
+                  <h4 className="font-semibold">Show on Profile</h4>
+                  
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="showProgress">Learning Progress</Label>
+                    <Switch
+                      id="showProgress"
+                      checked={privacy.showProgress}
+                      onCheckedChange={(checked) => setPrivacy({ ...privacy, showProgress: checked })}
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="showAchievements">Achievements</Label>
+                    <Switch
+                      id="showAchievements"
+                      checked={privacy.showAchievements}
+                      onCheckedChange={(checked) => setPrivacy({ ...privacy, showAchievements: checked })}
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="showActivity">Recent Activity</Label>
+                    <Switch
+                      id="showActivity"
+                      checked={privacy.showActivity}
+                      onCheckedChange={(checked) => setPrivacy({ ...privacy, showActivity: checked })}
+                    />
+                  </div>
+                </div>
+
+                <Separator />
+
+                <div className="space-y-3">
+                  <h4 className="font-semibold">Communication</h4>
+                  
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="allowDirectMessages">Allow Direct Messages</Label>
+                    <Switch
+                      id="allowDirectMessages"
+                      checked={privacy.allowDirectMessages}
+                      onCheckedChange={(checked) => setPrivacy({ ...privacy, allowDirectMessages: checked })}
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="showOnlineStatus">Show Online Status</Label>
+                    <Switch
+                      id="showOnlineStatus"
+                      checked={privacy.showOnlineStatus}
+                      onCheckedChange={(checked) => setPrivacy({ ...privacy, showOnlineStatus: checked })}
+                    />
+                  </div>
+                </div>
+
+                <Separator />
+
+                <div className="space-y-3">
+                  <h4 className="font-semibold">Data Collection</h4>
+                  
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-1">
+                      <Label htmlFor="dataCollection">Analytics & Improvements</Label>
+                      <p className="text-xs text-muted-foreground">Help us improve CodeSphere with anonymous usage data</p>
+                    </div>
+                    <Switch
+                      id="dataCollection"
+                      checked={privacy.dataCollection}
+                      onCheckedChange={(checked) => setPrivacy({ ...privacy, dataCollection: checked })}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex justify-end">
+                <Button onClick={handleSavePrivacy}>
+                  Save Privacy Settings
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Security */}
+        <TabsContent value="security" className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <Shield className="h-5 w-5" />
+                  <span>Account Security</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Password</Label>
+                  <div className="flex items-center justify-between p-3 border rounded-lg">
+                    <div>
+                      <p className="text-sm font-medium">••••••••••••</p>
+                      <p className="text-xs text-muted-foreground">
+                        Last changed: {security.passwordLastChanged}
+                      </p>
+                    </div>
+                    <Button variant="outline" size="sm">
+                      Change Password
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Two-Factor Authentication</Label>
+                  <div className="flex items-center justify-between p-3 border rounded-lg">
+                    <div>
+                      <p className="text-sm font-medium">
+                        {security.twoFactorEnabled ? 'Enabled' : 'Disabled'}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        Add an extra layer of security to your account
+                      </p>
+                    </div>
+                    <Button 
+                      variant={security.twoFactorEnabled ? "destructive" : "default"} 
+                      size="sm"
+                      onClick={() => setSecurity({ ...security, twoFactorEnabled: !security.twoFactorEnabled })}
+                    >
+                      {security.twoFactorEnabled ? 'Disable' : 'Enable'}
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Session Timeout</Label>
+                  <Select value={security.sessionTimeout} onValueChange={(value) => setSecurity({ ...security, sessionTimeout: value })}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="15min">15 minutes</SelectItem>
+                      <SelectItem value="1hour">1 hour</SelectItem>
+                      <SelectItem value="8hours">8 hours</SelectItem>
+                      <SelectItem value="auto">Automatic</SelectItem>
+                      <SelectItem value="never">Never</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="loginAlerts">Login Alerts</Label>
+                  <Switch
+                    id="loginAlerts"
+                    checked={security.loginAlerts}
+                    onCheckedChange={(checked) => setSecurity({ ...security, loginAlerts: checked })}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Active Sessions</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between p-3 border rounded-lg">
+                    <div className="flex items-center space-x-3">
+                      <Monitor className="h-4 w-4" />
+                      <div>
+                        <p className="text-sm font-medium">Current Session</p>
+                        <p className="text-xs text-muted-foreground">Chrome on Windows</p>
+                      </div>
+                    </div>
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  </div>
+
+                  <div className="flex items-center justify-between p-3 border rounded-lg">
+                    <div className="flex items-center space-x-3">
+                      <Smartphone className="h-4 w-4" />
+                      <div>
+                        <p className="text-sm font-medium">Mobile App</p>
+                        <p className="text-xs text-muted-foreground">iOS • 2 days ago</p>
+                      </div>
+                    </div>
+                    <Button variant="outline" size="sm">
+                      Revoke
+                    </Button>
+                  </div>
+
+                  <div className="flex items-center justify-between p-3 border rounded-lg">
+                    <div className="flex items-center space-x-3">
+                      <Monitor className="h-4 w-4" />
+                      <div>
+                        <p className="text-sm font-medium">Another Browser</p>
+                        <p className="text-xs text-muted-foreground">Firefox on Mac • 1 week ago</p>
+                      </div>
+                    </div>
+                    <Button variant="outline" size="sm">
+                      Revoke
+                    </Button>
+                  </div>
+                </div>
+
+                <Button variant="destructive" className="w-full">
+                  Revoke All Other Sessions
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="flex justify-end">
+            <Button onClick={handleSaveSecurity}>
+              Save Security Settings
+            </Button>
+          </div>
+        </TabsContent>
+
+        {/* Billing */}
+        <TabsContent value="billing" className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <CreditCard className="h-5 w-5" />
+                  <span>Current Plan</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="p-4 border-2 border-primary rounded-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="font-semibold text-lg">Pro Plan</h3>
+                    <div className="flex items-center space-x-1">
+                      <Zap className="h-4 w-4 text-yellow-500" />
+                      <span className="text-sm text-muted-foreground">Active</span>
+                    </div>
+                  </div>
+                  <p className="text-2xl font-bold">$29<span className="text-sm font-normal text-muted-foreground">/month</span></p>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    Next billing date: February 15, 2024
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <h4 className="font-semibold">Plan Features</h4>
+                  <ul className="text-sm space-y-1 text-muted-foreground">
+                    <li>• Unlimited access to all courses</li>
+                    <li>• Premium AI mentor support</li>
+                    <li>• Advanced code sandbox</li>
+                    <li>• Priority community support</li>
+                    <li>• Downloadable resources</li>
+                    <li>• Certificate of completion</li>
+                  </ul>
+                </div>
+
+                <div className="space-x-2">
+                  <Button variant="outline">Change Plan</Button>
+                  <Button variant="destructive">Cancel Subscription</Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Payment Method</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between p-3 border rounded-lg">
+                  <div className="flex items-center space-x-3">
+                    <CreditCard className="h-8 w-8" />
+                    <div>
+                      <p className="font-medium">•••• •••• •••• 4242</p>
+                      <p className="text-sm text-muted-foreground">Expires 12/26</p>
+                    </div>
+                  </div>
+                  <Button variant="outline" size="sm">
+                    Update
+                  </Button>
+                </div>
+
+                <Button className="w-full">
+                  Add Payment Method
+                </Button>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Billing History</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between p-3 border rounded-lg">
+                    <div>
+                      <p className="font-medium">$29.00</p>
+                      <p className="text-sm text-muted-foreground">January 15, 2024</p>
+                    </div>
+                    <Button variant="outline" size="sm">
+                      <Download className="mr-2 h-4 w-4" />
+                      Invoice
+                    </Button>
+                  </div>
+
+                  <div className="flex items-center justify-between p-3 border rounded-lg">
+                    <div>
+                      <p className="font-medium">$29.00</p>
+                      <p className="text-sm text-muted-foreground">December 15, 2023</p>
+                    </div>
+                    <Button variant="outline" size="sm">
+                      <Download className="mr-2 h-4 w-4" />
+                      Invoice
+                    </Button>
+                  </div>
+
+                  <div className="flex items-center justify-between p-3 border rounded-lg">
+                    <div>
+                      <p className="font-medium">$29.00</p>
+                      <p className="text-sm text-muted-foreground">November 15, 2023</p>
+                    </div>
+                    <Button variant="outline" size="sm">
+                      <Download className="mr-2 h-4 w-4" />
+                      Invoice
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Usage Statistics</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div>
+                    <div className="flex justify-between text-sm mb-1">
+                      <span>Monthly Credits</span>
+                      <span>750 / 1000</span>
+                    </div>
+                    <div className="w-full bg-muted rounded-full h-2">
+                      <div className="bg-primary h-2 rounded-full" style={{ width: '75%' }}></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="flex justify-between text-sm mb-1">
+                      <span>AI Mentor Sessions</span>
+                      <span>42 / 100</span>
+                    </div>
+                    <div className="w-full bg-muted rounded-full h-2">
+                      <div className="bg-primary h-2 rounded-full" style={{ width: '42%' }}></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="flex justify-between text-sm mb-1">
+                      <span>Sandbox Runtime</span>
+                      <span>18.5 / 50 hours</span>
+                    </div>
+                    <div className="w-full bg-muted rounded-full h-2">
+                      <div className="bg-primary h-2 rounded-full" style={{ width: '37%' }}></div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+}
