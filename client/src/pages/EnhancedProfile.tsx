@@ -31,7 +31,8 @@ import {
   Zap,
   Heart,
   MessageSquare,
-  ExternalLink
+  ExternalLink,
+  Eye
 } from 'lucide-react';
 
 interface Achievement {

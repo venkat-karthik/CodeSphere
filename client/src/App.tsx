@@ -9,13 +9,13 @@ import { Roadmaps } from './pages/Roadmaps';
 import { Resources } from './pages/Resources';
 import { Videos } from './pages/Videos';
 import { Problems } from './pages/Problems';
-import { Community } from './pages/Community';
+import { CommunityChannels } from './pages/CommunityChannels';
 import { Studio } from './pages/Studio';
-import { Sandbox } from './pages/Sandbox';
+import { AdvancedSandbox } from './pages/AdvancedSandbox';
 import { Mentor } from './pages/Mentor';
 import { SphereMap } from './pages/SphereMap';
-import { Profile } from './pages/Profile';
-import { Settings } from './pages/Settings';
+import { EnhancedProfile } from './pages/EnhancedProfile';
+import { EnhancedSettings } from './pages/EnhancedSettings';
 import { Section } from './types';
 
 function App() {
@@ -36,19 +36,19 @@ function App() {
       case 'problems':
         return <Problems />;
       case 'community':
-        return <Community />;
+        return <CommunityChannels />;
       case 'studio':
         return <Studio />;
       case 'sandbox':
-        return <Sandbox />;
+        return <AdvancedSandbox />;
       case 'mentor':
         return <Mentor />;
       case 'sphere-map':
         return <SphereMap />;
       case 'profile':
-        return <Profile />;
+        return <EnhancedProfile />;
       case 'settings':
-        return <Settings />;
+        return <EnhancedSettings />;
       default:
         return <Dashboard onSectionChange={setCurrentSection} />;
     }
