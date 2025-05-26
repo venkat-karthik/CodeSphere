@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { AuthProvider } from './hooks/useAuth';
 import { ThemeProvider } from './contexts/ThemeContext';
+import { UserRoleProvider } from './contexts/UserRoleContext';
 import { Layout } from './components/Layout';
 import { Dashboard } from './pages/Dashboard';
+import { AdminDashboard } from './pages/AdminDashboard';
 import { Roadmaps } from './pages/Roadmaps';
 import { Resources } from './pages/Resources';
 import { Videos } from './pages/Videos';
@@ -53,12 +55,14 @@ function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <Layout 
-          currentSection={currentSection} 
-          onSectionChange={setCurrentSection}
-        >
-          {renderSection()}
-        </Layout>
+        <UserRoleProvider>
+          <Layout 
+            currentSection={currentSection} 
+            onSectionChange={setCurrentSection}
+          >
+            {renderSection()}
+          </Layout>
+        </UserRoleProvider>
       </AuthProvider>
     </ThemeProvider>
   );
