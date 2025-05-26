@@ -116,11 +116,37 @@ export function Mentor() {
   };
 
   const generateAIResponse = async (userInput: string): Promise<string> => {
-    // Try to provide intelligent responses based on common programming topics
+    // Enhanced AI responses for various types of questions
     const input = userInput.toLowerCase();
     
-    if (input.includes('hello') || input.includes('hi')) {
-      return "Hello! I'm your AI coding mentor. I'm here to help you with programming questions, code reviews, debugging, and learning new concepts. What programming challenge can I help you with today?";
+    // Handle basic math questions
+    if (input.includes('what is') && (input.includes('+') || input.includes('-') || input.includes('*') || input.includes('/') || input.includes('='))) {
+      try {
+        const mathExpression = input.match(/what is (.+?)(\?|$)/)?.[1];
+        if (mathExpression) {
+          // Safe math evaluation for basic operations
+          const cleanExpression = mathExpression.replace(/[^0-9+\-*/.() ]/g, '');
+          if (cleanExpression && /^[0-9+\-*/.() ]+$/.test(cleanExpression)) {
+            const result = eval(cleanExpression);
+            return `The answer is **${result}**! 🧮
+
+I can help with both math and programming questions! Feel free to ask me about:
+• JavaScript, React, Node.js concepts
+• Code debugging and optimization  
+• Programming best practices
+• Algorithm explanations
+• Project ideas and guidance
+
+What else would you like to know?`;
+          }
+        }
+      } catch (e) {
+        return "I'd be happy to help with that calculation! Could you rephrase it? For example: 'What is 2 + 3' or 'What is 10 * 5'?";
+      }
+    }
+    
+    if (input.includes('hello') || input.includes('hi') || input.includes('hey')) {
+      return "Hello there! 👋 I'm your AI coding mentor and I'm excited to help you learn!\n\nI can assist you with:\n• Programming concepts and explanations\n• Code reviews and debugging\n• Math problems and calculations\n• Best practices and tips\n• Learning new technologies\n\nWhat would you like to explore today?";
     }
     
     if (input.includes('javascript') || input.includes('js')) {

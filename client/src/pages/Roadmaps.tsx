@@ -21,7 +21,7 @@ export function Roadmaps() {
   const courses = storage.getCourses();
   const currentCourse = courses[0]; // Frontend Developer Roadmap
 
-  const [selectedRoadmap, setSelectedRoadmap] = useState(null);
+  const [selectedRoadmap, setSelectedRoadmap] = useState<any>(null);
 
   const roadmaps = [
     {
@@ -126,6 +126,11 @@ export function Roadmaps() {
       color: 'from-yellow-500 to-orange-500'
     }
   ];
+
+  const handleContinueRoadmap = (roadmapId: string) => {
+    const roadmap = roadmaps.find(r => r.id === roadmapId);
+    setSelectedRoadmap(roadmap || null);
+  };
 
   return (
     <div className="max-w-7xl mx-auto space-y-8">
