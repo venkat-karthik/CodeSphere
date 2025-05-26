@@ -63,7 +63,7 @@ export function Sidebar({ currentSection, onSectionChange, onAuthModalOpen }: Si
       {/* Sidebar */}
       <div className={`fixed left-0 top-0 h-full bg-sidebar-background border-r border-sidebar-border z-50 transition-transform duration-300 ${
         isCollapsed ? '-translate-x-full lg:translate-x-0' : 'translate-x-0'
-      } w-80 lg:w-72`}>
+      } w-80 lg:w-72 overflow-y-auto scrollbar-hide`}>
         <div className="p-6">
           {/* Header */}
           <div className="flex items-center justify-between mb-8">
