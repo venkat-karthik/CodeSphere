@@ -190,7 +190,7 @@ export function Roadmaps() {
                   }`} />
                   <span>{module.title}</span>
                   {module.current && (
-                    <Badge className="ml-auto" size="sm">Current</Badge>
+                    <Badge className="ml-auto">Current</Badge>
                   )}
                 </div>
               ))}

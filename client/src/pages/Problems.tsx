@@ -23,7 +23,7 @@ export function Problems() {
   const { user, updateUser } = useAuth();
   const [problems] = useState(storage.getProblems());
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [currentProblem, setCurrentProblem] = useState(null);
+  const [currentProblem, setCurrentProblem] = useState<any>(null);
   const [userAnswer, setUserAnswer] = useState('');
   const [showResult, setShowResult] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
@@ -114,7 +114,7 @@ test();`,
   const handleStartProblem = (problemId: string) => {
     if (problemId.startsWith('snippet-')) {
       const problem = dailyCodeProblems.find(p => p.id === problemId);
-      setCurrentProblem(problem);
+      setCurrentProblem(problem || null);
       resetProblem();
     } else {
       alert(`Starting algorithmic problem: ${problemId}`);
