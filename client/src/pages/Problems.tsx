@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { 
   Star, 
   CheckCircle, 
@@ -9,7 +11,10 @@ import {
   Flame,
   Code,
   Trophy,
-  Target
+  Target,
+  Play,
+  RotateCcw,
+  Lightbulb
 } from 'lucide-react';
 import { storage } from '../lib/storage';
 import { useAuth } from '../hooks/useAuth';
@@ -18,6 +23,51 @@ export function Problems() {
   const { user, updateUser } = useAuth();
   const [problems] = useState(storage.getProblems());
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [currentProblem, setCurrentProblem] = useState(null);
+  const [userAnswer, setUserAnswer] = useState('');
+  const [showResult, setShowResult] = useState(false);
+  const [isCorrect, setIsCorrect] = useState(false);
+  const [showAnimation, setShowAnimation] = useState(false);
+
+  const dailyCodeProblems = [
+    {
+      id: 'snippet-1',
+      title: 'Array Method Challenge',
+      code: `const numbers = [1, 2, 3, 4, 5];
+const result = numbers.map(x => x * 2).filter(x => x > 5);
+console.log(result);`,
+      question: 'What will be logged to the console?',
+      correctAnswer: '[6, 8, 10]',
+      explanation: 'First map doubles each number [2,4,6,8,10], then filter keeps only numbers > 5'
+    },
+    {
+      id: 'snippet-2', 
+      title: 'Function Scope',
+      code: `function test() {
+  var a = 1;
+  if (true) {
+    var a = 2;
+    console.log(a);
+  }
+  console.log(a);
+}
+test();`,
+      question: 'What will be the output?',
+      correctAnswer: '2\n2',
+      explanation: 'var has function scope, so both console.logs refer to the same variable'
+    },
+    {
+      id: 'snippet-3',
+      title: 'Promise Chain',
+      code: `Promise.resolve(5)
+  .then(x => x * 2)
+  .then(x => x + 3)
+  .then(console.log);`,
+      question: 'What number will be logged?',
+      correctAnswer: '13',
+      explanation: '5 * 2 = 10, then 10 + 3 = 13'
+    }
+  ];
 
   const categories = [
     'all', 'Arrays', 'Strings', 'Dynamic Programming', 'Trees', 'Graphs'
@@ -37,9 +87,38 @@ export function Problems() {
     }
   };
 
+  const checkAnswer = () => {
+    if (!currentProblem) return;
+    
+    const correct = userAnswer.trim().toLowerCase() === currentProblem.correctAnswer.toLowerCase();
+    setIsCorrect(correct);
+    setShowResult(true);
+    setShowAnimation(true);
+    
+    // Hide animation after 3 seconds
+    setTimeout(() => setShowAnimation(false), 3000);
+    
+    if (correct && user) {
+      // Award XP for correct answer
+      updateUser({ ...user, xp: user.xp + 50 });
+    }
+  };
+
+  const resetProblem = () => {
+    setUserAnswer('');
+    setShowResult(false);
+    setIsCorrect(false);
+    setShowAnimation(false);
+  };
+
   const handleStartProblem = (problemId: string) => {
-    // In a real app, this would navigate to the problem solving interface
-    alert(`Starting problem: ${problemId}`);
+    if (problemId.startsWith('snippet-')) {
+      const problem = dailyCodeProblems.find(p => p.id === problemId);
+      setCurrentProblem(problem);
+      resetProblem();
+    } else {
+      alert(`Starting algorithmic problem: ${problemId}`);
+    }
   };
 
   const completedProblems = problems.filter(p => p.completed).length;

@@ -21,6 +21,8 @@ export function Roadmaps() {
   const courses = storage.getCourses();
   const currentCourse = courses[0]; // Frontend Developer Roadmap
 
+  const [selectedRoadmap, setSelectedRoadmap] = useState(null);
+
   const roadmaps = [
     {
       id: 'frontend',
@@ -31,7 +33,19 @@ export function Roadmaps() {
       modules: 12,
       progress: 65,
       status: 'In Progress',
-      color: 'from-orange-500 to-red-500'
+      color: 'from-orange-500 to-red-500',
+      skills: [
+        { name: 'HTML5 Fundamentals', completed: true, weeks: 2 },
+        { name: 'CSS3 & Responsive Design', completed: true, weeks: 3 },
+        { name: 'JavaScript ES6+', completed: true, weeks: 4 },
+        { name: 'Version Control (Git)', completed: true, weeks: 1 },
+        { name: 'React.js Basics', completed: false, weeks: 4, current: true },
+        { name: 'State Management', completed: false, weeks: 3 },
+        { name: 'TypeScript', completed: false, weeks: 2 },
+        { name: 'Testing & Debugging', completed: false, weeks: 2 },
+        { name: 'Build Tools & Deployment', completed: false, weeks: 2 },
+        { name: 'Performance Optimization', completed: false, weeks: 2 }
+      ]
     },
     {
       id: 'backend',
@@ -42,7 +56,19 @@ export function Roadmaps() {
       modules: 15,
       progress: 0,
       status: 'Not Started',
-      color: 'from-green-500 to-emerald-500'
+      color: 'from-green-500 to-emerald-500',
+      skills: [
+        { name: 'Programming Fundamentals', completed: false, weeks: 3 },
+        { name: 'Node.js & Express', completed: false, weeks: 4 },
+        { name: 'Database Design (SQL)', completed: false, weeks: 3 },
+        { name: 'MongoDB & NoSQL', completed: false, weeks: 2 },
+        { name: 'RESTful API Development', completed: false, weeks: 3 },
+        { name: 'Authentication & Security', completed: false, weeks: 3 },
+        { name: 'Server Deployment', completed: false, weeks: 2 },
+        { name: 'Microservices', completed: false, weeks: 4 },
+        { name: 'Docker & Containers', completed: false, weeks: 2 },
+        { name: 'Cloud Services (AWS)', completed: false, weeks: 3 }
+      ]
     },
     {
       id: 'fullstack',
@@ -53,7 +79,18 @@ export function Roadmaps() {
       modules: 20,
       progress: 0,
       status: 'Not Started',
-      color: 'from-blue-500 to-purple-500'
+      color: 'from-blue-500 to-purple-500',
+      skills: [
+        { name: 'Web Development Basics', completed: false, weeks: 2 },
+        { name: 'Frontend Fundamentals', completed: false, weeks: 6 },
+        { name: 'React.js Mastery', completed: false, weeks: 5 },
+        { name: 'Backend Development', completed: false, weeks: 6 },
+        { name: 'Database Management', completed: false, weeks: 4 },
+        { name: 'API Development', completed: false, weeks: 3 },
+        { name: 'DevOps & Deployment', completed: false, weeks: 3 },
+        { name: 'System Design', completed: false, weeks: 4 },
+        { name: 'Project Portfolio', completed: false, weeks: 3 }
+      ]
     },
     {
       id: 'mobile',
