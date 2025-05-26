@@ -1,253 +1,219 @@
 import { useState } from 'react';
-import { Link, useLocation } from 'wouter';
-import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
-import { useAuth } from '@/hooks/useAuth';
-import { ProgressBar } from './ProgressBar';
-import {
-  Home,
-  Route,
-  FileText,
-  Play,
-  Code,
-  Users,
-  Brain,
-  User,
+import { 
+  Home, 
+  Route, 
+  FileText, 
+  Play, 
+  Users, 
+  Code, 
+  Puzzle, 
+  Bot, 
+  User, 
   Settings,
   LogOut,
-  Menu,
   X,
+  Menu,
+  Flame,
+  Star
 } from 'lucide-react';
-
-const navigationItems = [
-  { name: 'Dashboard', href: '/dashboard', icon: Home },
-  { name: 'Learning Roadmaps', href: '/roadmaps', icon: Route },
-  { name: 'PDF Resources', href: '/resources', icon: FileText },
-  { name: 'Video Library', href: '/videos', icon: Play },
-  { name: 'Daily Problems', href: '/problems', icon: Code },
-  { name: 'Community Lounge', href: '/community', icon: Users },
-  { name: 'AI Mentor', href: '/mentor', icon: Brain },
-  { name: 'Profile', href: '/profile', icon: User },
-  { name: 'Settings', href: '/settings', icon: Settings },
-];
+import { useAuth } from '../hooks/useAuth';
+import { Section } from '../types';
+import { Button } from '@/components/ui/button';
 
 interface SidebarProps {
+  currentSection: Section;
+  onSectionChange: (section: Section) => void;
   onAuthModalOpen: (mode: 'login' | 'register') => void;
 }
 
-export function Sidebar({ onAuthModalOpen }: SidebarProps) {
+export function Sidebar({ currentSection, onSectionChange, onAuthModalOpen }: SidebarProps) {
+  const { isAuthenticated, user, logout } = useAuth();
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [isMobileOpen, setIsMobileOpen] = useState(false);
-  const [location] = useLocation();
-  const { auth, logout } = useAuth();
 
-  const xpProgress = auth.user ? (auth.user.xp % 1000) / 1000 * 100 : 0;
+  const navigation = [
+    { id: 'dashboard' as Section, icon: Home, label: 'Dashboard' },
+    { id: 'roadmaps' as Section, icon: Route, label: 'Learning Roadmaps' },
+    { id: 'resources' as Section, icon: FileText, label: 'PDF Resources' },
+    { id: 'videos' as Section, icon: Play, label: 'Video Library' },
+    { id: 'problems' as Section, icon: Puzzle, label: 'Daily Problems' },
+    { id: 'community' as Section, icon: Users, label: 'Community Lounge' },
+    { id: 'studio' as Section, icon: Code, label: 'Project Studio' },
+    { id: 'sandbox' as Section, icon: Code, label: 'App Sandbox' },
+    { id: 'mentor' as Section, icon: Bot, label: 'AI Mentor' },
+    { id: 'sphere-map' as Section, icon: Star, label: 'Sphere Map' }
+  ];
 
-  const SidebarContent = () => (
-    <div className="flex flex-col h-full">
-      {/* Header */}
-      <div className="p-6 border-b border-gray-700">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl flex items-center justify-center">
-              <span className="text-white font-bold text-lg">CS</span>
-            </div>
-            {!isCollapsed && (
-              <div>
-                <h1 className="text-xl font-bold text-white">CodeSphere</h1>
-                <p className="text-xs text-gray-400">Learning Platform</p>
-              </div>
-            )}
-          </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setIsCollapsed(!isCollapsed)}
-            className="hidden lg:flex text-gray-400 hover:text-white"
-          >
-            <Menu className="h-4 w-4" />
-          </Button>
-        </div>
-      </div>
+  const bottomNavigation = [
+    { id: 'profile' as Section, icon: User, label: 'Profile' },
+    { id: 'settings' as Section, icon: Settings, label: 'Settings' }
+  ];
 
-      {/* User Profile Section */}
-      {auth.isAuthenticated && auth.user && (
-        <div className="p-6 border-b border-gray-700">
-          <div className="flex items-center space-x-3 mb-4">
-            <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-purple-600 rounded-full flex items-center justify-center">
-              <span className="text-white font-semibold text-lg">
-                {auth.user.firstName.charAt(0)}{auth.user.lastName.charAt(0)}
-              </span>
-            </div>
-            {!isCollapsed && (
-              <div className="flex-1">
-                <h3 className="font-semibold text-white">
-                  {auth.user.firstName} {auth.user.lastName}
-                </h3>
-                <div className="flex items-center space-x-2">
-                  <span className="text-xs text-gray-400">Level</span>
-                  <span className="text-xs font-semibold text-purple-400">{auth.user.level}</span>
-                  <div className="flex items-center space-x-1">
-                    <span className="text-warning text-xs">🔥</span>
-                    <span className="text-xs text-orange-400 font-semibold">{auth.user.streak}</span>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-          
-          {!isCollapsed && (
-            <div>
-              <div className="flex justify-between text-xs text-gray-400 mb-1">
-                <span>XP</span>
-                <span>{auth.user.xp}/{(Math.floor(auth.user.xp / 1000) + 1) * 1000}</span>
-              </div>
-              <ProgressBar value={auth.user.xp % 1000} max={1000} color="primary" />
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Guest Profile Section */}
-      {!auth.isAuthenticated && (
-        <div className="p-6 border-b border-gray-700">
-          <div className="text-center">
-            <div className="w-12 h-12 bg-gray-600 rounded-full flex items-center justify-center mx-auto mb-3">
-              <User className="h-6 w-6 text-gray-400" />
-            </div>
-            {!isCollapsed && (
-              <>
-                <p className="text-sm text-gray-400 mb-3">Sign in to track your progress</p>
-                <Button
-                  onClick={() => onAuthModalOpen('login')}
-                  className="w-full bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white"
-                  size="sm"
-                >
-                  Sign In
-                </Button>
-              </>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Navigation */}
-      <nav className="flex-1 p-4 space-y-2">
-        {navigationItems.map((item) => {
-          const isActive = location === item.href;
-          const Icon = item.icon;
-          
-          return (
-            <Link key={item.name} href={item.href}>
-              <Button
-                variant="ghost"
-                className={cn(
-                  "w-full justify-start text-gray-300 hover:text-white hover:bg-gray-700/50",
-                  isActive && "bg-purple-600 text-white hover:bg-purple-700",
-                  isCollapsed && "px-2"
-                )}
-              >
-                <Icon className={cn("h-5 w-5", !isCollapsed && "mr-3")} />
-                {!isCollapsed && <span>{item.name}</span>}
-              </Button>
-            </Link>
-          );
-        })}
-      </nav>
-
-      {/* Footer */}
-      <div className="p-4 border-t border-gray-700">
-        {auth.isAuthenticated ? (
-          <Button
-            onClick={logout}
-            variant="ghost"
-            className={cn(
-              "w-full justify-start text-red-400 hover:text-red-300 hover:bg-red-900/20",
-              isCollapsed && "px-2"
-            )}
-          >
-            <LogOut className={cn("h-5 w-5", !isCollapsed && "mr-3")} />
-            {!isCollapsed && <span>Logout</span>}
-          </Button>
-        ) : !isCollapsed && (
-          <div className="space-y-2">
-            <Button
-              onClick={() => onAuthModalOpen('login')}
-              variant="outline"
-              className="w-full border-purple-500 text-purple-400 hover:bg-purple-500 hover:text-white"
-              size="sm"
-            >
-              Login
-            </Button>
-            <Button
-              onClick={() => onAuthModalOpen('register')}
-              className="w-full bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700"
-              size="sm"
-            >
-              Sign Up
-            </Button>
-          </div>
-        )}
-      </div>
-    </div>
-  );
+  const xpProgress = user ? (user.xp / user.nextLevelXP) * 100 : 0;
 
   return (
     <>
-      {/* Mobile Menu Button */}
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => setIsMobileOpen(true)}
-        className="fixed top-4 left-4 z-50 lg:hidden text-white bg-gray-800"
-      >
-        <Menu className="h-6 w-6" />
-      </Button>
-
-      {/* Mobile Overlay */}
-      {isMobileOpen && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
-          onClick={() => setIsMobileOpen(false)}
+      {/* Mobile overlay */}
+      {!isCollapsed && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          onClick={() => setIsCollapsed(true)}
         />
       )}
 
-      {/* Desktop Sidebar */}
-      <aside className={cn(
-        "fixed left-0 top-0 z-30 h-screen bg-gray-900 border-r border-gray-700 transition-all duration-300 hidden lg:block",
-        isCollapsed ? "w-20" : "w-80"
-      )}>
-        <SidebarContent />
-      </aside>
-
-      {/* Mobile Sidebar */}
-      <aside className={cn(
-        "fixed left-0 top-0 z-50 h-screen w-80 bg-gray-900 border-r border-gray-700 transition-transform duration-300 lg:hidden",
-        isMobileOpen ? "translate-x-0" : "-translate-x-full"
-      )}>
-        <div className="flex items-center justify-between p-6 border-b border-gray-700">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl flex items-center justify-center">
-              <span className="text-white font-bold text-lg">CS</span>
+      {/* Sidebar */}
+      <div className={`fixed left-0 top-0 h-full bg-sidebar-background border-r border-sidebar-border z-50 transition-transform duration-300 ${
+        isCollapsed ? '-translate-x-full lg:translate-x-0' : 'translate-x-0'
+      } w-80 lg:w-72`}>
+        <div className="p-6">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+                <span className="text-primary-foreground font-bold text-lg">CS</span>
+              </div>
+              <div>
+                <h1 className="text-xl font-bold">CodeSphere</h1>
+                <p className="text-xs text-muted-foreground">Learning Platform</p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-xl font-bold text-white">CodeSphere</h1>
-              <p className="text-xs text-gray-400">Learning Platform</p>
-            </div>
+            <button
+              onClick={() => setIsCollapsed(true)}
+              className="lg:hidden text-muted-foreground hover:text-foreground"
+            >
+              <X className="h-5 w-5" />
+            </button>
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setIsMobileOpen(false)}
-            className="text-gray-400 hover:text-white"
-          >
-            <X className="h-4 w-4" />
-          </Button>
+
+          {/* User Profile */}
+          {isAuthenticated && user ? (
+            <div className="bg-card/50 rounded-xl p-4 mb-6">
+              <div className="flex items-center space-x-3 mb-3">
+                <div className="w-12 h-12 bg-gradient-to-br from-primary to-purple-600 rounded-full flex items-center justify-center">
+                  <span className="text-primary-foreground font-semibold">
+                    {user.firstName[0]}{user.lastName[0]}
+                  </span>
+                </div>
+                <div className="flex-1">
+                  <div className="font-semibold">{user.firstName} {user.lastName}</div>
+                  <div className="text-sm text-muted-foreground">Level {user.level}</div>
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm text-muted-foreground">
+                  <span>XP Progress</span>
+                  <span>{user.xp}/{user.nextLevelXP}</span>
+                </div>
+                <div className="w-full bg-muted rounded-full h-2">
+                  <div 
+                    className="progress-bar h-2 rounded-full transition-all duration-300" 
+                    style={{ width: `${xpProgress}%` }}
+                  />
+                </div>
+                <div className="flex justify-between text-sm">
+                  <div className="flex items-center space-x-1">
+                    <Flame className="h-4 w-4 text-orange-500" />
+                    <span className="text-orange-500 font-semibold">{user.streak}</span>
+                  </div>
+                  <div className="text-muted-foreground">
+                    Courses: {user.completedCourses}
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="bg-card/50 rounded-xl p-4 mb-6 text-center">
+              <div className="w-12 h-12 bg-muted rounded-full flex items-center justify-center mx-auto mb-3">
+                <User className="h-6 w-6 text-muted-foreground" />
+              </div>
+              <p className="text-sm text-muted-foreground mb-3">Sign in to track your progress</p>
+              <Button 
+                onClick={() => onAuthModalOpen('login')}
+                className="w-full"
+                size="sm"
+              >
+                Sign In
+              </Button>
+            </div>
+          )}
+
+          {/* Navigation */}
+          <nav className="space-y-2">
+            {navigation.map((item) => (
+              <button
+                key={item.id}
+                onClick={() => onSectionChange(item.id)}
+                className={`sidebar-item w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left ${
+                  currentSection === item.id
+                    ? 'bg-primary text-primary-foreground'
+                    : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
+                }`}
+              >
+                <item.icon className="h-5 w-5 flex-shrink-0" />
+                <span>{item.label}</span>
+              </button>
+            ))}
+          </nav>
+
+          {/* Bottom Navigation */}
+          <div className="border-t border-sidebar-border mt-6 pt-6">
+            <nav className="space-y-2">
+              {bottomNavigation.map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => onSectionChange(item.id)}
+                  className={`sidebar-item w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left ${
+                    currentSection === item.id
+                      ? 'bg-primary text-primary-foreground'
+                      : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
+                  }`}
+                >
+                  <item.icon className="h-5 w-5 flex-shrink-0" />
+                  <span>{item.label}</span>
+                </button>
+              ))}
+            </nav>
+          </div>
+
+          {/* Auth Buttons / Logout */}
+          <div className="mt-8">
+            {isAuthenticated ? (
+              <Button
+                onClick={logout}
+                variant="destructive"
+                className="w-full"
+              >
+                <LogOut className="h-4 w-4 mr-2" />
+                Logout
+              </Button>
+            ) : (
+              <div className="space-y-2">
+                <Button
+                  onClick={() => onAuthModalOpen('login')}
+                  variant="outline"
+                  className="w-full"
+                >
+                  Login
+                </Button>
+                <Button
+                  onClick={() => onAuthModalOpen('register')}
+                  className="w-full"
+                >
+                  Sign Up
+                </Button>
+              </div>
+            )}
+          </div>
         </div>
-        <div className="h-[calc(100vh-80px)]">
-          <SidebarContent />
-        </div>
-      </aside>
+      </div>
+
+      {/* Mobile menu button */}
+      <button
+        onClick={() => setIsCollapsed(false)}
+        className="fixed top-4 left-4 z-40 lg:hidden bg-card border border-border p-2 rounded-lg"
+      >
+        <Menu className="h-5 w-5" />
+      </button>
     </>
   );
 }

@@ -1,70 +1,34 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { User } from '@/types';
-import { StorageService } from '@/utils/storage';
-
-interface AuthContextType {
-  user: User | null;
-  isAuthenticated: boolean;
-  login: (email: string, password: string) => Promise<boolean>;
-  register: (userData: RegisterData) => Promise<boolean>;
-  logout: () => void;
-  updateUser: (userData: Partial<User>) => void;
-  isLoading: boolean;
-}
-
-interface RegisterData {
-  firstName: string;
-  lastName: string;
-  email: string;
-  password: string;
-}
+import { User, AuthState, AuthContextType } from '../types';
+import { storage } from '../lib/storage';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [authState, setAuthState] = useState<AuthState>({
+    isAuthenticated: false,
+    user: null
+  });
 
   useEffect(() => {
-    // Check if user is already authenticated on app start
-    const checkAuth = () => {
-      const isAuth = StorageService.isAuthenticated();
-      const currentUser = StorageService.getCurrentUser();
-      
-      if (isAuth && currentUser) {
-        setUser(currentUser);
-        setIsAuthenticated(true);
-      }
-      setIsLoading(false);
-    };
-
-    checkAuth();
+    const isAuthenticated = storage.getAuthState();
+    const user = storage.getCurrentUser();
+    
+    if (isAuthenticated && user) {
+      setAuthState({ isAuthenticated: true, user });
+    }
   }, []);
 
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
-      const foundUser = StorageService.findUserByEmail(email);
+      const users = storage.getAllUsers();
+      const user = users.find(u => u.email === email);
       
-      if (foundUser && foundUser.email === email) {
+      if (user) {
         // In a real app, you'd verify the password hash
-        setUser(foundUser);
-        setIsAuthenticated(true);
-        StorageService.setAuthenticated(true);
-        StorageService.setCurrentUser(foundUser);
-        
-        // Add login activity
-        StorageService.addActivity({
-          id: Date.now().toString(),
-          type: 'course_completion',
-          title: 'Logged In',
-          description: 'Successfully logged into CodeSphere',
-          xpGained: 0,
-          timestamp: new Date().toISOString(),
-          icon: 'login',
-          color: 'green'
-        });
-        
+        storage.setAuthState(true);
+        storage.setCurrentUser(user);
+        setAuthState({ isAuthenticated: true, user });
         return true;
       }
       return false;
@@ -74,57 +38,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const register = async (userData: RegisterData): Promise<boolean> => {
+  const register = async (userData: Omit<User, 'id' | 'joinDate'>): Promise<boolean> => {
     try {
-      // Check if user already exists
-      const existingUser = StorageService.findUserByEmail(userData.email);
-      if (existingUser) {
+      const users = storage.getAllUsers();
+      
+      // Check if email already exists
+      if (users.find(u => u.email === userData.email)) {
         return false;
       }
 
-      // Create new user
       const newUser: User = {
+        ...userData,
         id: Date.now().toString(),
-        email: userData.email,
-        firstName: userData.firstName,
-        lastName: userData.lastName,
+        joinDate: new Date().toISOString(),
         level: 1,
         xp: 0,
+        nextLevelXP: 100,
         streak: 0,
-        totalXP: 0,
-        coursesCompleted: 0,
-        problemsSolved: 0,
-        joinDate: new Date().toISOString(),
-        preferences: {
-          learningPath: 'frontend',
-          experienceLevel: 'beginner',
-          dailyGoal: 30,
-          notifications: {
-            email: true,
-            dailyReminders: true,
-            communityUpdates: false
-          }
-        }
+        completedCourses: 0,
+        problemsSolved: 0
       };
 
-      StorageService.addUser(newUser);
-      setUser(newUser);
-      setIsAuthenticated(true);
-      StorageService.setAuthenticated(true);
-      StorageService.setCurrentUser(newUser);
-
-      // Add welcome activity
-      StorageService.addActivity({
-        id: Date.now().toString(),
-        type: 'course_completion',
-        title: 'Welcome to CodeSphere!',
-        description: 'Account created successfully',
-        xpGained: 100,
-        timestamp: new Date().toISOString(),
-        icon: 'star',
-        color: 'purple'
-      });
-
+      storage.addUser(newUser);
+      storage.setAuthState(true);
+      storage.setCurrentUser(newUser);
+      setAuthState({ isAuthenticated: true, user: newUser });
       return true;
     } catch (error) {
       console.error('Registration error:', error);
@@ -133,29 +71,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const logout = () => {
-    setUser(null);
-    setIsAuthenticated(false);
-    StorageService.setAuthenticated(false);
-    // Keep user data in storage for future logins
+    storage.setAuthState(false);
+    localStorage.removeItem('codesphere_user');
+    setAuthState({ isAuthenticated: false, user: null });
   };
 
-  const updateUser = (userData: Partial<User>) => {
-    if (user) {
-      const updatedUser = { ...user, ...userData };
-      setUser(updatedUser);
-      StorageService.updateUser(updatedUser);
+  const updateUser = (updates: Partial<User>) => {
+    if (authState.user) {
+      const updatedUser = { ...authState.user, ...updates };
+      storage.updateUser(updatedUser);
+      setAuthState(prev => ({ ...prev, user: updatedUser }));
     }
   };
 
   return (
-    <AuthContext.Provider value={{
-      user,
-      isAuthenticated,
-      login,
-      register,
-      logout,
-      updateUser,
-      isLoading
+    <AuthContext.Provider value={{ 
+      ...authState, 
+      login, 
+      register, 
+      logout, 
+      updateUser 
     }}>
       {children}
     </AuthContext.Provider>

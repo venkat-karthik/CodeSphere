@@ -1,92 +1,109 @@
 export interface User {
-  id: number;
+  id: string;
   firstName: string;
   lastName: string;
   email: string;
   level: number;
   xp: number;
+  nextLevelXP: number;
   streak: number;
-  totalXP: number;
-  coursesCompleted: number;
-  problemsSolved: number;
   joinDate: string;
-  isActive: boolean;
+  completedCourses: number;
+  problemsSolved: number;
+  learningPath?: string;
+  avatar?: string;
+}
+
+export interface RegisterData {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
 }
 
 export interface AuthState {
-  user: User | null;
   isAuthenticated: boolean;
-  isLoading: boolean;
+  user: User | null;
 }
 
-export interface Roadmap {
-  id: number;
+export interface AuthContextType extends AuthState {
+  login: (email: string, password: string) => Promise<boolean>;
+  register: (userData: Omit<User, 'id' | 'joinDate'>) => Promise<boolean>;
+  logout: () => void;
+  updateUser: (updates: Partial<User>) => void;
+}
+
+export interface Course {
+  id: string;
   title: string;
   description: string;
   category: string;
-  difficulty: string;
-  totalModules: number;
-  estimatedHours: number;
-  progress?: number;
-  completedModules?: number;
-  isActive: boolean;
+  difficulty: 'beginner' | 'intermediate' | 'advanced';
+  progress: number;
+  completed: boolean;
+  modules: CourseModule[];
 }
 
-export interface Resource {
-  id: number;
+export interface CourseModule {
+  id: string;
+  title: string;
+  completed: boolean;
+  current?: boolean;
+}
+
+export interface PDFResource {
+  id: string;
   title: string;
   description: string;
   category: string;
-  difficulty: string;
-  fileSize: string;
+  difficulty: 'beginner' | 'intermediate' | 'advanced';
   pages: number;
+  size: string;
   downloads: number;
   uploadDate: string;
   tags: string[];
 }
 
 export interface Problem {
-  id: number;
+  id: string;
   title: string;
   description: string;
-  difficulty: string;
+  difficulty: 'easy' | 'medium' | 'hard';
   category: string;
   tags: string[];
   xpReward: number;
-  isDaily: boolean;
-  solved?: boolean;
-  solvedDate?: string;
+  completed: boolean;
+  attempts: number;
 }
 
 export interface Post {
-  id: number;
-  userId: number;
+  id: string;
+  author: {
+    name: string;
+    avatar: string;
+    level: number;
+  };
   title: string;
   content: string;
   category: string;
+  tags: string[];
   likes: number;
   replies: number;
-  createdAt: string;
-  author?: {
-    firstName: string;
-    lastName: string;
-    level: number;
-  };
-}
-
-export interface UserProgress {
-  roadmapId: number;
-  completedModules: number;
-  progressPercentage: number;
-  lastActiveDate: string;
+  timestamp: string;
+  liked?: boolean;
 }
 
 export type Section = 
-  | 'landing'
-  | 'dashboard'
-  | 'roadmaps'
-  | 'resources'
-  | 'community'
-  | 'problems'
-  | 'mentor'
-  | 'profile';
+  | 'dashboard' 
+  | 'roadmaps' 
+  | 'resources' 
+  | 'videos' 
+  | 'problems' 
+  | 'community' 
+  | 'studio' 
+  | 'sandbox' 
+  | 'mentor' 
+  | 'sphere-map' 
+  | 'profile' 
+  | 'settings';

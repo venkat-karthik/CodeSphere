@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, json } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -11,11 +11,8 @@ export const users = pgTable("users", {
   level: integer("level").notNull().default(1),
   xp: integer("xp").notNull().default(0),
   streak: integer("streak").notNull().default(0),
-  totalXP: integer("total_xp").notNull().default(0),
-  coursesCompleted: integer("courses_completed").notNull().default(0),
-  problemsSolved: integer("problems_solved").notNull().default(0),
-  joinDate: timestamp("join_date").defaultNow().notNull(),
-  isActive: boolean("is_active").notNull().default(true),
+  joinDate: timestamp("join_date").notNull().defaultNow(),
+  preferences: json("preferences"),
 });
 
 export const roadmaps = pgTable("roadmaps", {
@@ -24,18 +21,18 @@ export const roadmaps = pgTable("roadmaps", {
   description: text("description").notNull(),
   category: text("category").notNull(),
   difficulty: text("difficulty").notNull(),
-  totalModules: integer("total_modules").notNull(),
-  estimatedHours: integer("estimated_hours").notNull(),
-  isActive: boolean("is_active").notNull().default(true),
+  modules: json("modules").notNull(),
+  estimatedTime: text("estimated_time"),
 });
 
 export const userProgress = pgTable("user_progress", {
   id: serial("id").primaryKey(),
-  userId: integer("user_id").notNull().references(() => users.id),
-  roadmapId: integer("roadmap_id").notNull().references(() => roadmaps.id),
-  completedModules: integer("completed_modules").notNull().default(0),
+  userId: integer("user_id").notNull(),
+  roadmapId: integer("roadmap_id").notNull(),
+  completedModules: json("completed_modules").notNull().default([]),
+  currentModule: text("current_module"),
   progressPercentage: integer("progress_percentage").notNull().default(0),
-  lastActiveDate: timestamp("last_active_date").defaultNow(),
+  lastAccessed: timestamp("last_accessed").notNull().defaultNow(),
 });
 
 export const resources = pgTable("resources", {
@@ -43,12 +40,14 @@ export const resources = pgTable("resources", {
   title: text("title").notNull(),
   description: text("description").notNull(),
   category: text("category").notNull(),
+  type: text("type").notNull(), // 'pdf', 'video', 'article'
+  url: text("url"),
   difficulty: text("difficulty").notNull(),
-  fileSize: text("file_size").notNull(),
-  pages: integer("pages").notNull(),
-  downloads: integer("downloads").notNull().default(0),
-  uploadDate: timestamp("upload_date").defaultNow().notNull(),
-  tags: text("tags").array(),
+  tags: json("tags").notNull().default([]),
+  downloadCount: integer("download_count").notNull().default(0),
+  fileSize: text("file_size"),
+  pageCount: integer("page_count"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
 export const problems = pgTable("problems", {
@@ -57,35 +56,40 @@ export const problems = pgTable("problems", {
   description: text("description").notNull(),
   difficulty: text("difficulty").notNull(),
   category: text("category").notNull(),
-  tags: text("tags").array(),
-  xpReward: integer("xp_reward").notNull(),
+  tags: json("tags").notNull().default([]),
+  solution: text("solution"),
+  hints: json("hints").notNull().default([]),
+  xpReward: integer("xp_reward").notNull().default(100),
   isDaily: boolean("is_daily").notNull().default(false),
+  date: timestamp("date"),
 });
 
 export const userSolutions = pgTable("user_solutions", {
   id: serial("id").primaryKey(),
-  userId: integer("user_id").notNull().references(() => users.id),
-  problemId: integer("problem_id").notNull().references(() => problems.id),
-  solved: boolean("solved").notNull().default(false),
-  solvedDate: timestamp("solved_date"),
+  userId: integer("user_id").notNull(),
+  problemId: integer("problem_id").notNull(),
+  solution: text("solution").notNull(),
+  isCorrect: boolean("is_correct").notNull().default(false),
+  submittedAt: timestamp("submitted_at").notNull().defaultNow(),
+  xpEarned: integer("xp_earned").notNull().default(0),
 });
 
-export const posts = pgTable("posts", {
+export const communityPosts = pgTable("community_posts", {
   id: serial("id").primaryKey(),
-  userId: integer("user_id").notNull().references(() => users.id),
+  userId: integer("user_id").notNull(),
   title: text("title").notNull(),
   content: text("content").notNull(),
   category: text("category").notNull(),
+  tags: json("tags").notNull().default([]),
   likes: integer("likes").notNull().default(0),
   replies: integer("replies").notNull().default(0),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
+  isResolved: boolean("is_resolved").notNull().default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
-export const insertUserSchema = createInsertSchema(users).pick({
-  firstName: true,
-  lastName: true,
-  email: true,
-  password: true,
+export const insertUserSchema = createInsertSchema(users).omit({
+  id: true,
+  joinDate: true,
 });
 
 export const insertRoadmapSchema = createInsertSchema(roadmaps).omit({
@@ -94,30 +98,29 @@ export const insertRoadmapSchema = createInsertSchema(roadmaps).omit({
 
 export const insertResourceSchema = createInsertSchema(resources).omit({
   id: true,
-  downloads: true,
-  uploadDate: true,
+  createdAt: true,
 });
 
 export const insertProblemSchema = createInsertSchema(problems).omit({
   id: true,
 });
 
-export const insertPostSchema = createInsertSchema(posts).omit({
+export const insertCommunityPostSchema = createInsertSchema(communityPosts).omit({
   id: true,
+  createdAt: true,
   likes: true,
   replies: true,
-  createdAt: true,
 });
 
-export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
-export type InsertRoadmap = z.infer<typeof insertRoadmapSchema>;
+export type InsertUser = z.infer<typeof insertUserSchema>;
 export type Roadmap = typeof roadmaps.$inferSelect;
-export type InsertResource = z.infer<typeof insertResourceSchema>;
-export type Resource = typeof resources.$inferSelect;
-export type InsertProblem = z.infer<typeof insertProblemSchema>;
-export type Problem = typeof problems.$inferSelect;
-export type InsertPost = z.infer<typeof insertPostSchema>;
-export type Post = typeof posts.$inferSelect;
+export type InsertRoadmap = z.infer<typeof insertRoadmapSchema>;
 export type UserProgress = typeof userProgress.$inferSelect;
+export type Resource = typeof resources.$inferSelect;
+export type InsertResource = z.infer<typeof insertResourceSchema>;
+export type Problem = typeof problems.$inferSelect;
+export type InsertProblem = z.infer<typeof insertProblemSchema>;
 export type UserSolution = typeof userSolutions.$inferSelect;
+export type CommunityPost = typeof communityPosts.$inferSelect;
+export type InsertCommunityPost = z.infer<typeof insertCommunityPostSchema>;

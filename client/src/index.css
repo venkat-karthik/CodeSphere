@@ -3,25 +3,33 @@
 @tailwind utilities;
 
 :root {
-  --background: 240 10% 3.9%;
+  --background: 240 10% 9%; /* #0F0F23 */
   --foreground: 0 0% 98%;
-  --card: 240 10% 3.9%;
+  --card: 240 6% 18%; /* #1E1B4B */
   --card-foreground: 0 0% 98%;
-  --popover: 240 10% 3.9%;
+  --popover: 240 6% 18%;
   --popover-foreground: 0 0% 98%;
-  --primary: 271 81% 56%;
-  --primary-foreground: 355 7% 97%;
-  --secondary: 240 3.7% 15.9%;
+  --primary: 262 83% 58%; /* #8B5CF6 */
+  --primary-foreground: 0 0% 98%;
+  --secondary: 240 4% 16%;
   --secondary-foreground: 0 0% 98%;
-  --muted: 240 3.7% 15.9%;
-  --muted-foreground: 240 5% 64.9%;
-  --accent: 240 3.7% 15.9%;
+  --muted: 240 4% 16%;
+  --muted-foreground: 240 5% 64%;
+  --accent: 240 4% 16%;
   --accent-foreground: 0 0% 98%;
-  --destructive: 0 62.8% 30.6%;
+  --destructive: 0 62% 30%;
   --destructive-foreground: 0 0% 98%;
-  --border: 240 3.7% 15.9%;
-  --input: 240 3.7% 15.9%;
-  --ring: 271 81% 56%;
+  --border: 240 4% 16%;
+  --input: 240 4% 16%;
+  --ring: 262 83% 58%;
+  --sidebar-background: 240 6% 18%;
+  --sidebar-foreground: 0 0% 98%;
+  --sidebar-primary: 262 83% 58%;
+  --sidebar-primary-foreground: 0 0% 98%;
+  --sidebar-accent: 240 4% 16%;
+  --sidebar-accent-foreground: 0 0% 98%;
+  --sidebar-border: 240 4% 16%;
+  --sidebar-ring: 262 83% 58%;
   --radius: 0.75rem;
 }
 
@@ -33,32 +41,36 @@
   body {
     @apply bg-background text-foreground font-sans antialiased;
     font-family: 'Inter', sans-serif;
-    background: linear-gradient(135deg, #0F0F23 0%, #1E1B4B 50%, #312E81 100%);
-    min-height: 100vh;
-  }
-
-  h1, h2, h3, h4, h5, h6 {
-    @apply font-semibold;
   }
 }
 
 @layer components {
-  .gradient-text {
-    @apply bg-gradient-to-r from-purple-400 to-purple-600 bg-clip-text text-transparent;
-  }
-
   .gradient-bg {
-    background: linear-gradient(135deg, #0F0F23 0%, #1E1B4B 50%, #312E81 100%);
+    background: linear-gradient(135deg, hsl(var(--background)) 0%, hsl(var(--card)) 50%, hsl(240 6% 25%) 100%);
   }
-
+  
+  .progress-bar {
+    background: linear-gradient(90deg, hsl(var(--primary)) 0%, hsl(269 100% 75%) 100%);
+  }
+  
   .card-hover {
-    @apply transition-all duration-300 hover:transform hover:-translate-y-1 hover:shadow-xl hover:shadow-purple-500/10;
+    @apply transition-all duration-300 hover:shadow-lg hover:shadow-primary/10 hover:-translate-y-1;
   }
-
-  .progress-ring {
-    transform: rotate(-90deg);
+  
+  .sidebar-item {
+    @apply transition-all duration-200 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground;
   }
+  
+  .modal-backdrop {
+    backdrop-filter: blur(8px);
+  }
+  
+  .glow {
+    box-shadow: 0 0 20px hsl(var(--primary) / 0.3);
+  }
+}
 
+@layer utilities {
   .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;
@@ -66,175 +78,5 @@
   
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
-  }
-
-  .glass-effect {
-    @apply bg-white/5 backdrop-blur-sm border border-white/10;
-  }
-
-  .code-block {
-    @apply bg-slate-900 border border-slate-700 rounded-lg p-4 font-mono text-sm;
-  }
-
-  .difficulty-easy {
-    @apply bg-green-500/20 text-green-400 border border-green-500/30;
-  }
-
-  .difficulty-medium {
-    @apply bg-yellow-500/20 text-yellow-400 border border-yellow-500/30;
-  }
-
-  .difficulty-hard {
-    @apply bg-red-500/20 text-red-400 border border-red-500/30;
-  }
-
-  .category-javascript {
-    @apply bg-yellow-500/20 text-yellow-400;
-  }
-
-  .category-react {
-    @apply bg-blue-500/20 text-blue-400;
-  }
-
-  .category-css {
-    @apply bg-purple-500/20 text-purple-400;
-  }
-
-  .category-nodejs {
-    @apply bg-green-500/20 text-green-400;
-  }
-
-  .category-typescript {
-    @apply bg-blue-700/20 text-blue-300;
-  }
-
-  .category-html {
-    @apply bg-orange-500/20 text-orange-400;
-  }
-
-  .category-python {
-    @apply bg-green-600/20 text-green-300;
-  }
-
-  .xp-badge {
-    @apply bg-purple-500/20 text-purple-400 px-2 py-1 rounded-full text-xs font-semibold;
-  }
-
-  .streak-badge {
-    @apply bg-orange-500/20 text-orange-400 px-2 py-1 rounded-full text-xs font-semibold;
-  }
-
-  .level-badge {
-    @apply bg-blue-500/20 text-blue-400 px-2 py-1 rounded-full text-xs font-semibold;
-  }
-
-  .achievement-unlocked {
-    @apply bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border border-yellow-500/30;
-  }
-
-  .achievement-locked {
-    @apply bg-slate-800/50 border border-slate-600 opacity-60;
-  }
-
-  .nav-active {
-    @apply bg-purple-600/20 text-white border border-purple-600/30;
-  }
-
-  .nav-inactive {
-    @apply text-slate-300 hover:bg-slate-700/50 hover:text-white;
-  }
-
-  .modal-backdrop {
-    backdrop-filter: blur(8px);
-  }
-
-  .pulse-glow {
-    animation: pulse-glow 2s infinite;
-  }
-
-  @keyframes pulse-glow {
-    0%, 100% {
-      box-shadow: 0 0 10px rgba(139, 92, 246, 0.3);
-    }
-    50% {
-      box-shadow: 0 0 20px rgba(139, 92, 246, 0.6);
-    }
-  }
-
-  .fade-in {
-    animation: fadeIn 0.3s ease-in-out;
-  }
-
-  @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
-
-  .slide-in {
-    animation: slideIn 0.3s ease-out;
-  }
-
-  @keyframes slideIn {
-    from { 
-      transform: translateX(-20px); 
-      opacity: 0; 
-    }
-    to { 
-      transform: translateX(0); 
-      opacity: 1; 
-    }
-  }
-
-  .loading-shimmer {
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
-    background-size: 200% 100%;
-    animation: shimmer 1.5s infinite;
-  }
-
-  @keyframes shimmer {
-    0% { background-position: -200% 0; }
-    100% { background-position: 200% 0; }
-  }
-}
-
-/* Custom scrollbar for webkit browsers */
-::-webkit-scrollbar {
-  width: 6px;
-}
-
-::-webkit-scrollbar-track {
-  background: #1E1B4B;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #4C1D95;
-  border-radius: 3px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #6D28D9;
-}
-
-/* Focus styles */
-button:focus-visible,
-input:focus-visible,
-textarea:focus-visible,
-select:focus-visible {
-  @apply outline-none ring-2 ring-purple-500 ring-offset-2 ring-offset-slate-900;
-}
-
-/* Selection styles */
-::selection {
-  @apply bg-purple-500/30 text-white;
-}
-
-/* Print styles */
-@media print {
-  body {
-    @apply text-black bg-white;
-  }
-  
-  .no-print {
-    display: none !important;
   }
 }
