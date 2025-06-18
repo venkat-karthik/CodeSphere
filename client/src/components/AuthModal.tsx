@@ -81,7 +81,13 @@ export function AuthModal({ isOpen, onClose, defaultMode = 'login' }: AuthModalP
       firstName: data.firstName,
       lastName: data.lastName,
       email: data.email,
-      password: data.password,
+      role: 'student',
+      level: 1,
+      xp: 0,
+      nextLevelXP: 100,
+      streak: 0,
+      completedCourses: 0,
+      problemsSolved: 0
     });
     
     if (success) {

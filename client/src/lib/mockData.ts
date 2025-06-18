@@ -1,4 +1,4 @@
-import { Roadmap, PdfResource, Problem, CommunityPost } from '@/types';
+import { Roadmap, PDFResource, Problem, CommunityPost } from '@/types';
 
 export const mockRoadmaps: Roadmap[] = [
   {
@@ -7,11 +7,26 @@ export const mockRoadmaps: Roadmap[] = [
     description: 'Master modern frontend technologies including React, Vue, and advanced CSS',
     category: 'Web Development',
     difficulty: 'beginner',
-    modules: 12,
-    estimatedTime: '3-4 months',
-    color: 'from-orange-500 to-red-500',
-    icon: 'fas fa-palette',
+    status: 'In Progress',
     progress: 65,
+    skills: [
+      {
+        id: '1',
+        title: 'HTML & CSS Fundamentals',
+        description: 'Learn the basics of HTML and CSS',
+        weeks: 2,
+        difficulty: 'beginner',
+        resources: ['HTML Guide', 'CSS Tutorial'],
+        projects: ['Personal Portfolio'],
+        estimatedHours: 20,
+        completed: true,
+        current: false
+      }
+    ],
+    estimatedHours: 480,
+    demand: 'High',
+    createdAt: '2024-01-01T00:00:00Z',
+    updatedAt: '2024-01-15T00:00:00Z'
   },
   {
     id: '2',
@@ -19,11 +34,13 @@ export const mockRoadmaps: Roadmap[] = [
     description: 'Learn server-side development with Node.js, Python, databases, and APIs',
     category: 'Web Development',
     difficulty: 'intermediate',
-    modules: 15,
-    estimatedTime: '4-5 months',
-    color: 'from-green-500 to-emerald-500',
-    icon: 'fas fa-server',
+    status: 'Not Started',
     progress: 0,
+    skills: [],
+    estimatedHours: 600,
+    demand: 'High',
+    createdAt: '2024-01-01T00:00:00Z',
+    updatedAt: '2024-01-01T00:00:00Z'
   },
   {
     id: '3',
@@ -75,7 +92,7 @@ export const mockRoadmaps: Roadmap[] = [
   },
 ];
 
-export const mockPdfResources: PdfResource[] = [
+export const mockPdfResources: PDFResource[] = [
   {
     id: '1',
     title: 'JavaScript Fundamentals Handbook',
@@ -85,8 +102,8 @@ export const mockPdfResources: PdfResource[] = [
     pages: 42,
     size: '2.4 MB',
     downloads: 1245,
+    uploadDate: '2024-01-15',
     tags: ['beginner', 'fundamentals'],
-    addedDate: '2024-01-15T00:00:00Z',
   },
   {
     id: '2',
@@ -97,8 +114,8 @@ export const mockPdfResources: PdfResource[] = [
     pages: 36,
     size: '1.8 MB',
     downloads: 887,
+    uploadDate: '2024-01-20',
     tags: ['intermediate', 'hooks'],
-    addedDate: '2024-01-20T00:00:00Z',
   },
   {
     id: '3',
@@ -159,7 +176,8 @@ export const mockProblems: Problem[] = [
     category: 'Arrays',
     tags: ['Array', 'Hash Table'],
     xpReward: 100,
-    solved: false,
+    completed: false,
+    attempts: 0
   },
   {
     id: '2',
@@ -169,7 +187,8 @@ export const mockProblems: Problem[] = [
     category: 'Strings',
     tags: ['Stack', 'Strings'],
     xpReward: 150,
-    solved: false,
+    completed: false,
+    attempts: 0
   },
   {
     id: '3',
@@ -179,7 +198,8 @@ export const mockProblems: Problem[] = [
     category: 'Dynamic Programming',
     tags: ['Dynamic Programming', 'Arrays'],
     xpReward: 250,
-    solved: true,
+    completed: true,
+    attempts: 2
   },
   {
     id: '4',
@@ -189,7 +209,8 @@ export const mockProblems: Problem[] = [
     category: 'Trees',
     tags: ['Trees', 'Recursion'],
     xpReward: 400,
-    solved: false,
+    completed: false,
+    attempts: 0
   },
   {
     id: '5',
@@ -199,25 +220,23 @@ export const mockProblems: Problem[] = [
     category: 'Strings',
     tags: ['Strings', 'Two Pointers'],
     xpReward: 100,
-    solved: true,
+    completed: true,
+    attempts: 1
   },
 ];
 
 export const mockCommunityPosts: CommunityPost[] = [
   {
     id: '1',
-    author: {
-      name: 'Alex Smith',
-      level: 8,
-      avatar: 'AS',
-    },
-    title: 'How to optimize React component re-renders?',
-    content: "I'm working on a complex React app and noticing performance issues. The components seem to re-render more often than necessary. What are the best practices for optimizing this?",
+    title: 'Best practices for React state management',
     category: 'React',
-    tags: ['React', 'Performance'],
-    likes: 24,
-    replies: 8,
-    timestamp: '2 hours ago',
+    tags: ['React', 'State Management'],
+    createdAt: '2024-01-20T00:00:00Z',
+    content: 'What are your favorite patterns for managing state in React applications?',
+    replies: 15,
+    userId: 'user1',
+    likes: 42,
+    isResolved: false
   },
   {
     id: '2',
@@ -259,5 +278,6 @@ export const todaysProblem: Problem = {
   category: 'Arrays',
   tags: ['Array', 'Hash Table'],
   xpReward: 500,
-  solved: false,
+  completed: false,
+  attempts: 0
 };

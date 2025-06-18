@@ -67,9 +67,10 @@ export function AuthModals({ isOpen, mode, onClose, onSwitchMode }: AuthModalsPr
         firstName: registerData.firstName,
         lastName: registerData.lastName,
         email: registerData.email,
+        role: 'student',
+        level: 1,
         xp: 0,
         nextLevelXP: 100,
-        level: 1,
         streak: 0,
         completedCourses: 0,
         problemsSolved: 0
@@ -97,65 +98,73 @@ export function AuthModals({ isOpen, mode, onClose, onSwitchMode }: AuthModalsPr
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 modal-backdrop z-50 flex items-center justify-center p-4">
-      <div className="bg-card rounded-xl w-full max-w-md border border-border relative">
+    <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-2">
+      <div className="bg-cs-bg rounded-xl w-full max-w-lg border border-cs-sidebar shadow-xl relative">
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-muted-foreground hover:text-foreground transition-colors"
+          className="absolute top-3 right-3 text-cs-body hover:text-cs-heading transition-colors"
         >
           <X className="h-5 w-5" />
         </button>
 
         {mode === 'login' ? (
-          <div className="p-8">
-            <div className="text-center mb-6">
-              <div className="w-16 h-16 bg-primary rounded-xl flex items-center justify-center mx-auto mb-4">
-                <span className="text-primary-foreground font-bold text-xl">CS</span>
+          <div className="p-10">
+            <div className="text-center mb-4">
+              <div className="w-12 h-12 bg-cs-primary rounded-lg flex items-center justify-center mx-auto mb-2 shadow">
+                <span className="text-white font-bold text-lg">CS</span>
               </div>
-              <h2 className="text-2xl font-bold mb-2">Welcome Back</h2>
-              <p className="text-muted-foreground">Sign in to your CodeSphere account</p>
+              <h2 className="text-xl font-bold mb-1 text-cs-heading">Sign In</h2>
+              <p className="text-cs-body text-sm">Access your account</p>
             </div>
 
-            <LoginInstructions />
+            {/* Collapsible Demo Accounts */}
+            <details className="mb-4">
+              <summary className="cursor-pointer text-cs-primary text-sm mb-2">Show Demo Accounts</summary>
+              <div className="mt-2 bg-cs-sidebar rounded-lg p-2 border border-cs-primary/30">
+                <div className="text-xs">
+                  <LoginInstructions />
+                </div>
+              </div>
+            </details>
 
-            <form onSubmit={handleLogin} className="space-y-4">
+            <form onSubmit={handleLogin} className="space-y-4 mt-2">
               <div>
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email" className="text-cs-body text-sm">Email</Label>
                 <Input
                   id="email"
                   type="email"
                   value={loginData.email}
                   onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
-                  placeholder="Enter your email"
+                  placeholder="Email"
                   required
+                  className="bg-cs-sidebar border-cs-primary text-cs-heading placeholder-cs-body focus:ring-cs-primary text-sm py-2"
                 />
               </div>
               <div>
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password" className="text-cs-body text-sm">Password</Label>
                 <Input
                   id="password"
                   type="password"
                   value={loginData.password}
                   onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
-                  placeholder="Enter your password"
+                  placeholder="Password"
                   required
+                  className="bg-cs-sidebar border-cs-primary text-cs-heading placeholder-cs-body focus:ring-cs-primary text-sm py-2"
                 />
               </div>
-              
               {error && (
-                <div className="text-destructive text-sm">{error}</div>
+                <div className="text-red-400 text-xs">{error}</div>
               )}
-
-              <Button type="submit" className="w-full" disabled={loading}>
+              <Button type="submit" className="w-full bg-cs-primary hover:bg-cs-secondary text-white font-semibold py-2 rounded-md shadow transition-all duration-150 text-sm" disabled={loading}>
                 {loading ? 'Signing in...' : 'Sign In'}
               </Button>
             </form>
 
-            <div className="text-center mt-6">
-              <span className="text-muted-foreground">Don't have an account? </span>
+            <div className="text-center mt-4">
+              <span className="text-cs-body text-xs">No account? </span>
               <button
                 onClick={() => onSwitchMode('register')}
-                className="text-primary hover:text-primary/80 font-medium transition-colors"
+                className="text-cs-primary hover:text-cs-secondary font-medium transition-colors text-xs"
               >
                 Sign up
               </button>

@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { AuthProvider } from './hooks/useAuth';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { UserRoleProvider } from './contexts/UserRoleContext';
+import { NotificationsProvider } from './contexts/NotificationsContext';
+import { AssignmentProvider } from './contexts/AssignmentContext';
 import { Layout } from './components/Layout';
 import { Dashboard } from './pages/Dashboard';
 import { AdminDashboard } from './pages/AdminDashboard';
@@ -16,6 +18,8 @@ import { Mentor } from './pages/Mentor';
 import { SphereMap } from './pages/SphereMap';
 import { EnhancedProfile } from './pages/EnhancedProfile';
 import { EnhancedSettings } from './pages/EnhancedSettings';
+import { PlatformAnalytics } from './pages/PlatformAnalytics';
+import { LiveClasses } from './pages/LiveClasses';
 import { Section } from './types';
 
 function App() {
@@ -49,6 +53,10 @@ function App() {
         return <EnhancedProfile />;
       case 'settings':
         return <EnhancedSettings />;
+      case 'analytics':
+        return <PlatformAnalytics />;
+      case 'live-classes':
+        return <LiveClasses />;
       default:
         return <Dashboard onSectionChange={setCurrentSection} />;
     }
@@ -58,12 +66,16 @@ function App() {
     <ThemeProvider>
       <AuthProvider>
         <UserRoleProvider>
-          <Layout 
-            currentSection={currentSection} 
-            onSectionChange={setCurrentSection}
-          >
-            {renderSection()}
-          </Layout>
+          <NotificationsProvider>
+            <AssignmentProvider>
+              <Layout 
+                currentSection={currentSection} 
+                onSectionChange={setCurrentSection}
+              >
+                {renderSection()}
+              </Layout>
+            </AssignmentProvider>
+          </NotificationsProvider>
         </UserRoleProvider>
       </AuthProvider>
     </ThemeProvider>

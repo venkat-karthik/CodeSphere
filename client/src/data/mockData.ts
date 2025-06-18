@@ -2,26 +2,45 @@ import { Roadmap, Resource, Problem, CommunityPost } from '@/types';
 
 export const roadmapsData: Roadmap[] = [
   {
-    id: 1,
+    id: '1',
     title: 'Frontend Developer',
     description: 'Master modern frontend technologies including React, Vue, and advanced CSS',
     category: 'Web Development',
     difficulty: 'beginner',
-    estimatedDuration: '3-4 months',
-    totalModules: 12,
+    status: 'In Progress',
     progress: 65,
-    completedModules: 8,
+    skills: [
+      {
+        id: '1',
+        title: 'HTML & CSS Fundamentals',
+        description: 'Learn the basics of HTML and CSS',
+        weeks: 2,
+        difficulty: 'beginner',
+        resources: ['HTML Guide', 'CSS Tutorial'],
+        projects: ['Personal Portfolio'],
+        estimatedHours: 20,
+        completed: true,
+        current: false
+      }
+    ],
+    estimatedHours: 480,
+    demand: 'High',
+    createdAt: '2024-01-01T00:00:00Z',
+    updatedAt: '2024-01-15T00:00:00Z'
   },
   {
-    id: 2,
+    id: '2',
     title: 'Backend Developer',
     description: 'Learn server-side development with Node.js, Python, databases, and APIs',
     category: 'Web Development',
     difficulty: 'intermediate',
-    estimatedDuration: '4-5 months',
-    totalModules: 15,
+    status: 'Not Started',
     progress: 0,
-    completedModules: 0,
+    skills: [],
+    estimatedHours: 600,
+    demand: 'High',
+    createdAt: '2024-01-01T00:00:00Z',
+    updatedAt: '2024-01-01T00:00:00Z'
   },
   {
     id: 3,
@@ -71,27 +90,29 @@ export const roadmapsData: Roadmap[] = [
 
 export const resourcesData: Resource[] = [
   {
-    id: 1,
+    id: '1',
     title: 'JavaScript Fundamentals Handbook',
     description: 'A comprehensive guide to JavaScript basics including variables, functions, and objects',
     type: 'pdf',
     category: 'javascript',
     difficulty: 'beginner',
-    fileSize: '2.4 MB',
-    pageCount: 42,
-    downloads: 1245,
+    url: '/resources/js-fundamentals.pdf',
+    tags: ['JavaScript', 'Basics', 'Fundamentals'],
+    rating: 4.5,
+    reviews: 1245,
     createdAt: '2024-11-26T00:00:00Z',
   },
   {
-    id: 2,
+    id: '2',
     title: 'React Hooks Explained',
     description: 'Deep dive into React hooks with practical examples and best practices',
     type: 'pdf',
     category: 'react',
     difficulty: 'intermediate',
-    fileSize: '1.8 MB',
-    pageCount: 36,
-    downloads: 887,
+    url: '/resources/react-hooks.pdf',
+    tags: ['React', 'Hooks', 'Frontend'],
+    rating: 4.8,
+    reviews: 887,
     createdAt: '2024-12-05T00:00:00Z',
   },
   {
@@ -146,71 +167,74 @@ export const resourcesData: Resource[] = [
 
 export const problemsData: Problem[] = [
   {
-    id: 1,
+    id: '1',
     title: 'Two Sum',
     description: 'Given an array of integers and a target sum, return indices of two numbers that add up to the target.',
     difficulty: 'easy',
     category: 'Arrays',
     tags: ['Array', 'Hash Table'],
     xpReward: 100,
+    completed: false,
+    attempts: 0
   },
   {
-    id: 2,
+    id: '2',
     title: 'Valid Parentheses',
     description: 'Determine if the input string has valid parentheses combinations.',
     difficulty: 'easy',
     category: 'Strings',
     tags: ['Stack', 'String'],
     xpReward: 150,
+    completed: false,
+    attempts: 0
   },
   {
-    id: 3,
+    id: '3',
     title: 'Maximum Subarray',
     description: 'Find the contiguous subarray with the largest sum.',
     difficulty: 'medium',
     category: 'Dynamic Programming',
     tags: ['Dynamic Programming', 'Array'],
     xpReward: 250,
-    solved: true,
-    solvedAt: '2025-01-19T00:00:00Z',
+    completed: true,
+    attempts: 2
   },
   {
-    id: 4,
+    id: '4',
     title: 'Binary Tree Traversal',
     description: 'Implement different binary tree traversal algorithms.',
     difficulty: 'hard',
     category: 'Trees',
     tags: ['Tree', 'Recursion'],
     xpReward: 400,
+    completed: false,
+    attempts: 0
   },
   {
-    id: 5,
+    id: '5',
     title: 'Reverse String',
     description: 'Write a function that reverses a string using different approaches.',
     difficulty: 'easy',
     category: 'Strings',
     tags: ['String', 'Two Pointers'],
     xpReward: 100,
-    solved: true,
-    solvedAt: '2025-01-24T00:00:00Z',
+    completed: true,
+    attempts: 1
   },
 ];
 
 export const communityData: CommunityPost[] = [
   {
-    id: 1,
-    userId: 1,
-    author: {
-      name: 'Alex Smith',
-      level: 8,
-    },
-    title: 'How to optimize React component re-renders?',
-    content: "I'm working on a complex React app and noticing performance issues. The components seem to re-render more often than necessary. What are the best practices for optimizing this?",
+    id: '1',
+    title: 'Best practices for React state management',
     category: 'React',
-    tags: ['React', 'Performance'],
-    likes: 24,
-    replies: 8,
-    createdAt: '2025-01-26T10:00:00Z',
+    tags: ['React', 'State Management'],
+    createdAt: '2024-01-20T00:00:00Z',
+    content: 'What are your favorite patterns for managing state in React applications?',
+    replies: 15,
+    userId: 'user1',
+    likes: 42,
+    isResolved: false
   },
   {
     id: 2,

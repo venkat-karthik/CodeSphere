@@ -1,6 +1,7 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import { VideoServer } from "./videoServer";
 
 const app = express();
 app.use(express.json());
@@ -38,6 +39,10 @@ app.use((req, res, next) => {
 
 (async () => {
   const server = await registerRoutes(app);
+  
+  // Initialize video server for WebSocket connections
+  const videoServer = new VideoServer(server);
+  console.log("🎥 Video conferencing server initialized");
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
@@ -63,5 +68,6 @@ app.use((req, res, next) => {
   server.listen(port, "127.0.0.1", () => {
     log(`serving on port ${port}`);
     console.log(`🚀 CodeSphere Platform running at: http://127.0.0.1:${port}`);
+    console.log(`🎥 Video conferencing available at: http://127.0.0.1:${port}`);
   });
 })();

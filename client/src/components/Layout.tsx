@@ -4,6 +4,10 @@ import { AuthModals } from './AuthModals';
 import { Section } from '../types';
 import { Search, Bell } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
+import { useNotifications } from '../contexts/NotificationsContext';
+import { LiveClasses } from './LiveClasses';
+import { SphereMap } from './SphereMap';
+import { CodeSandbox } from './CodeSandbox';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -13,6 +17,7 @@ interface LayoutProps {
 
 export function Layout({ children, currentSection, onSectionChange }: LayoutProps) {
   const { isAuthenticated } = useAuth();
+  const { unreadCount } = useNotifications();
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
 
@@ -24,6 +29,7 @@ export function Layout({ children, currentSection, onSectionChange }: LayoutProp
   const getSectionTitle = (section: Section): string => {
     const titles: Record<Section, string> = {
       dashboard: 'Dashboard',
+      'admin-dashboard': 'Admin Dashboard',
       roadmaps: 'Learning Roadmaps',
       resources: 'PDF Resources',
       videos: 'Video Library',
@@ -33,6 +39,9 @@ export function Layout({ children, currentSection, onSectionChange }: LayoutProp
       sandbox: 'App Sandbox',
       mentor: 'AI Mentor',
       'sphere-map': 'Sphere Map',
+      analytics: 'Analytics',
+      'platform-analytics': 'Platform Analytics',
+      'live-classes': 'Live Classes',
       profile: 'Profile',
       settings: 'Settings'
     };
@@ -70,9 +79,11 @@ export function Layout({ children, currentSection, onSectionChange }: LayoutProp
               {isAuthenticated && (
                 <button className="relative text-muted-foreground hover:text-foreground transition-colors">
                   <Bell className="h-5 w-5" />
-                  <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                    3
-                  </span>
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                      {unreadCount > 9 ? '9+' : unreadCount}
+                    </span>
+                  )}
                 </button>
               )}
             </div>
@@ -81,7 +92,9 @@ export function Layout({ children, currentSection, onSectionChange }: LayoutProp
 
         {/* Page Content */}
         <div className="p-6">
-          {children}
+          {currentSection === 'live-classes' ? <LiveClasses /> :
+           currentSection === 'sphere-map' ? <SphereMap /> :
+           currentSection === 'sandbox' ? <CodeSandbox /> : children}
         </div>
       </main>
 

@@ -13,6 +13,14 @@ export default {
       colors: {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
+        // Custom CodeSphere palette
+        'cs-bg': '#18122B',
+        'cs-sidebar': '#0F0B1E',
+        'cs-primary': '#A084E8',
+        'cs-secondary': '#6F61C0',
+        'cs-heading': '#C5BFFF',
+        'cs-body': '#B8B8D1',
+        'cs-btn-black': '#18122B',
         card: {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",

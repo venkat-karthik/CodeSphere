@@ -14,15 +14,247 @@ import {
   BookOpen,
   Code,
   Users,
-  Bot
+  Bot,
+  BarChart3,
+  Video
 } from 'lucide-react';
+import { Leaderboard } from '@/components/Leaderboard';
+import { NotificationsPanel } from '@/components/NotificationsPanel';
+import { AIMentor } from '@/components/AIMentor';
+import { StudentAssignments } from '@/components/StudentAssignments';
+import { useEffect, useRef, useState } from 'react';
 
 interface DashboardProps {
   onSectionChange: (section: Section) => void;
 }
 
+const tourSteps = [
+  {
+    title: "Welcome to CodeSphere!",
+    content: "This is your personalized learning dashboard. Let's take a quick tour!"
+  },
+  {
+    title: "Today's Focus",
+    content: "See your next learning step and upcoming class right at the top.",
+    target: 'todayFocusRef'
+  },
+  {
+    title: "Notifications",
+    content: "Get reminders for assignments, classes, and important updates.",
+    target: 'notificationsRef'
+  },
+  {
+    title: "Quick Actions",
+    content: "Jump into coding, ask your mentor, or join a class with one click.",
+    target: 'quickActionsRef'
+  },
+  {
+    title: "Sidebar Navigation",
+    content: "Use the sidebar to explore all features: learning, collaboration, analytics, and more.",
+    target: 'sidebarRef'
+  },
+  {
+    title: "Need Help?",
+    content: "Click the ? icon or visit your profile for help and support."
+  }
+];
+
+interface GetStartedTourProps {
+  onClose: () => void;
+  targetRef?: React.RefObject<HTMLElement>;
+  step: number;
+}
+
+function GetStartedTour({ onClose, targetRef, step }: GetStartedTourProps) {
+  const [currentStepIndex, setCurrentStepIndex] = useState(step);
+
+  const tourDialogRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (targetRef && targetRef.current && tourDialogRef.current) {
+      const targetRect = targetRef.current.getBoundingClientRect();
+      const dialogRect = tourDialogRef.current.getBoundingClientRect();
+
+      let top = targetRect.top;
+      let left = targetRect.right + 20;
+
+      if (left + dialogRect.width > window.innerWidth) {
+        left = targetRect.left - dialogRect.width - 20;
+      }
+
+      if (left < 0) {
+        left = targetRect.right + 20;
+      }
+      
+      if (top + dialogRect.height > window.innerHeight) {
+        top = targetRect.bottom - dialogRect.height;
+      }
+
+      top = Math.max(0, Math.min(top, window.innerHeight - dialogRect.height));
+      left = Math.max(0, Math.min(left, window.innerWidth - dialogRect.width));
+
+      tourDialogRef.current.style.top = `${top}px`;
+      tourDialogRef.current.style.left = `${left}px`;
+      tourDialogRef.current.style.position = 'fixed';
+    } else if (tourDialogRef.current) {
+      tourDialogRef.current.style.top = '50%';
+      tourDialogRef.current.style.left = '50%';
+      tourDialogRef.current.style.transform = 'translate(-50%, -50%)';
+      tourDialogRef.current.style.position = 'fixed';
+    }
+  }, [currentStepIndex, targetRef]);
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60" onClick={onClose}>
+      <div 
+        ref={tourDialogRef}
+        className="bg-white dark:bg-card rounded-xl shadow-xl max-w-sm w-full p-6 relative"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <h2 className="text-xl font-bold mb-2">{tourSteps[currentStepIndex].title}</h2>
+        <p className="mb-4 text-muted-foreground text-sm">{tourSteps[currentStepIndex].content}</p>
+        <div className="flex justify-between items-center">
+          <button
+            className="text-xs text-muted-foreground underline"
+            onClick={onClose}
+          >
+            Skip Tour
+          </button>
+          <div className="space-x-2">
+            {currentStepIndex > 0 && (
+              <Button size="sm" variant="outline" onClick={() => setCurrentStepIndex(currentStepIndex - 1)}>
+                Back
+              </Button>
+            )}
+            {currentStepIndex < tourSteps.length - 1 ? (
+              <Button size="sm" onClick={() => setCurrentStepIndex(currentStepIndex + 1)}>
+                Next
+              </Button>
+            ) : (
+              <Button size="sm" onClick={onClose}>
+                Finish
+              </Button>
+            )}
+          </div>
+        </div>
+        <div className="absolute top-3 right-3 text-xs text-muted-foreground">
+          Step {currentStepIndex + 1} of {tourSteps.length}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function Dashboard({ onSectionChange }: DashboardProps) {
   const { user, isAuthenticated } = useAuth();
+  const [showTour, setShowTour] = useState(false);
+  const [tourStep, setTourStep] = useState(0);
+  const [currentTourTargetRef, setCurrentTourTargetRef] = useState<React.RefObject<HTMLElement> | undefined>(undefined);
+  const [liveClasses, setLiveClasses] = useState<any[]>([]);
+  const [nextClass, setNextClass] = useState<any>(null);
+
+  const todayFocusRef = useRef<HTMLDivElement>(null);
+  const notificationsRef = useRef<HTMLDivElement>(null);
+  const quickActionsRef = useRef<HTMLDivElement>(null);
+
+  const tourTargets: Record<string, React.RefObject<HTMLElement>> = {
+    todayFocusRef: todayFocusRef,
+    notificationsRef: notificationsRef,
+    quickActionsRef: quickActionsRef,
+  };
+
+  useEffect(() => {
+    const tourComplete = localStorage.getItem('codesphere_tour_complete');
+    if (!tourComplete && isAuthenticated && user) {
+      setShowTour(true);
+    }
+  }, [isAuthenticated, user]);
+
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      fetchLiveClasses();
+    }
+  }, [isAuthenticated, user]);
+
+  const fetchLiveClasses = async () => {
+    try {
+      const response = await fetch('/api/live-classes');
+      if (response.ok) {
+        const data = await response.json();
+        setLiveClasses(data);
+        
+        // Find the next upcoming class
+        const now = new Date();
+        const upcomingClasses = data.filter((cls: any) => {
+          const startTime = new Date(cls.startTime);
+          return startTime > now && cls.status === 'scheduled';
+        }).sort((a: any, b: any) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime());
+        
+        if (upcomingClasses.length > 0) {
+          setNextClass(upcomingClasses[0]);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to fetch live classes:', error);
+    }
+  };
+
+  useEffect(() => {
+    if (showTour) {
+      const currentStepTarget = tourSteps[tourStep].target;
+      if (currentStepTarget && tourTargets[currentStepTarget]) {
+        setCurrentTourTargetRef(tourTargets[currentStepTarget]);
+      } else {
+        setCurrentTourTargetRef(undefined);
+      }
+    }
+  }, [showTour, tourStep]);
+
+  const handleCloseTour = () => {
+    localStorage.setItem('codesphere_tour_complete', 'true');
+    setShowTour(false);
+    setTourStep(0);
+  };
+
+  const handleNextTourStep = () => {
+    setTourStep(prevStep => {
+      const nextStep = prevStep + 1;
+      const totalSteps = tourSteps.length;
+      if (nextStep < totalSteps) {
+        return nextStep;
+      } else {
+        handleCloseTour();
+        return prevStep;
+      }
+    });
+  };
+
+  const handlePrevTourStep = () => {
+    setTourStep(prevStep => Math.max(0, prevStep - 1));
+  };
+
+  const handleJoinNextClass = () => {
+    if (nextClass) {
+      onSectionChange('live-classes');
+    } else {
+      onSectionChange('live-classes');
+    }
+  };
+
+  const formatClassTime = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffTime = date.getTime() - now.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays === 0) {
+      return `Today at ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+    } else if (diffDays === 1) {
+      return `Tomorrow at ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+    } else {
+      return `${date.toLocaleDateString()} at ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+    }
+  };
 
   if (!isAuthenticated || !user) {
     return (
@@ -83,18 +315,25 @@ export function Dashboard({ onSectionChange }: DashboardProps) {
   const xpProgress = (user.xp / user.nextLevelXP) * 100;
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
+    <div className="max-w-3xl mx-auto space-y-10 py-8">
+      {showTour && (
+        <GetStartedTour 
+          onClose={handleCloseTour} 
+          targetRef={currentTourTargetRef} 
+          step={tourStep}
+        />
+      )}
       {/* Welcome Header */}
-      <div className="flex justify-between items-start">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4">
         <div>
-          <h1 className="text-3xl font-bold mb-2">
+          <h1 className="text-3xl font-bold mb-1">
             Welcome back, {user.firstName}! 👋
           </h1>
-          <p className="text-muted-foreground">
-            Ready to continue your coding journey?
+          <p className="text-muted-foreground text-lg">
+            Ready for a productive day? Stay focused and keep learning!
           </p>
         </div>
-        <div className="text-right">
+        <div className="text-right mt-4 md:mt-0">
           <div className="text-sm text-muted-foreground">Current Streak</div>
           <div className="text-2xl font-bold text-orange-500 flex items-center">
             <Flame className="h-6 w-6 mr-1" />
@@ -103,213 +342,100 @@ export function Dashboard({ onSectionChange }: DashboardProps) {
         </div>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid md:grid-cols-4 gap-6">
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-muted-foreground text-sm mb-1">Total XP</div>
-                <div className="text-2xl font-bold">{user.xp}</div>
-              </div>
-              <div className="w-12 h-12 bg-primary/20 rounded-lg flex items-center justify-center">
-                <Star className="h-6 w-6 text-primary" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-muted-foreground text-sm mb-1">Courses Completed</div>
-                <div className="text-2xl font-bold">{user.completedCourses}</div>
-              </div>
-              <div className="w-12 h-12 bg-green-500/20 rounded-lg flex items-center justify-center">
-                <CheckCircle className="h-6 w-6 text-green-500" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-muted-foreground text-sm mb-1">Problems Solved</div>
-                <div className="text-2xl font-bold">{user.problemsSolved}</div>
-              </div>
-              <div className="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center">
-                <Code className="h-6 w-6 text-blue-500" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-muted-foreground text-sm mb-1">Current Level</div>
-                <div className="text-2xl font-bold">{user.level}</div>
-              </div>
-              <div className="w-12 h-12 bg-purple-500/20 rounded-lg flex items-center justify-center">
-                <Trophy className="h-6 w-6 text-purple-500" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Main Content Grid */}
-      <div className="grid lg:grid-cols-2 gap-8">
-        {/* Continue Learning */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Continue Learning</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="bg-card/50 rounded-lg p-4">
-              <div className="flex justify-between items-start mb-3">
-                <div>
-                  <h3 className="font-semibold">Frontend Developer Roadmap</h3>
-                  <p className="text-sm text-muted-foreground">Currently: ES6+ Features</p>
-                </div>
-                <Badge variant="secondary">65% Complete</Badge>
-              </div>
-              <Progress value={65} className="mb-3" />
-              <Button 
-                onClick={() => onSectionChange('roadmaps')}
-                className="w-full"
-              >
-                Continue Learning
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Recent Activity */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Recent Activity</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
-                <CheckCircle className="h-4 w-4 text-white" />
-              </div>
-              <div className="flex-1">
-                <div className="text-sm">Completed "JavaScript DOM Manipulation"</div>
-                <div className="text-xs text-muted-foreground">2 hours ago</div>
-              </div>
-              <div className="text-green-500 font-semibold text-sm">+250 XP</div>
-            </div>
-            
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
-                <Code className="h-4 w-4 text-white" />
-              </div>
-              <div className="flex-1">
-                <div className="text-sm">Solved "Two Sum" problem</div>
-                <div className="text-xs text-muted-foreground">1 day ago</div>
-              </div>
-              <div className="text-blue-500 font-semibold text-sm">+100 XP</div>
-            </div>
-            
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center">
-                <Flame className="h-4 w-4 text-white" />
-              </div>
-              <div className="flex-1">
-                <div className="text-sm">Maintained {user.streak}-day streak</div>
-                <div className="text-xs text-muted-foreground">Today</div>
-              </div>
-              <div className="text-orange-500 font-semibold text-sm">Streak!</div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Today's Challenge */}
-      <Card className="bg-gradient-to-r from-primary/10 to-purple-500/10 border-primary/20">
+      {/* Today's Focus */}
+      <Card ref={todayFocusRef}>
         <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle>Today's Challenge</CardTitle>
-            <Badge className="bg-primary/20 text-primary">+500 XP</Badge>
-          </div>
+          <CardTitle>Today's Focus</CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="mb-4">
-            <h3 className="font-semibold mb-2">Implement a Binary Search Algorithm</h3>
-            <p className="text-muted-foreground text-sm">
-              Write a function that performs binary search on a sorted array. 
-              Test with various inputs and edge cases.
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-2 mb-4">
-            <Badge variant="outline">Medium</Badge>
-            <Badge variant="outline">Algorithms</Badge>
-            <Badge variant="outline">JavaScript</Badge>
-          </div>
-          <div className="flex gap-4">
-            <Button onClick={() => onSectionChange('problems')}>
-              Start Challenge
+        <CardContent className="space-y-4">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div>
+              <div className="font-semibold text-lg mb-1">Continue: Frontend Developer Roadmap</div>
+              <div className="text-sm text-muted-foreground mb-2">Next: ES6+ Features</div>
+              <Badge variant="secondary">65% Complete</Badge>
+            </div>
+            <Button size="lg" className="w-full md:w-auto" onClick={() => onSectionChange('roadmaps')}>
+              Start Learning <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
+          </div>
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mt-4">
+            <div>
+              <div className="font-semibold text-lg mb-1">
+                {nextClass ? 'Next Class' : 'Live Classes'}
+              </div>
+              <div className="text-sm text-muted-foreground mb-2">
+                {nextClass ? nextClass.title : 'Join upcoming sessions'}
+              </div>
+              <Badge variant="secondary">
+                {nextClass ? formatClassTime(nextClass.startTime) : 'View all classes'}
+              </Badge>
+            </div>
             <Button 
+              size="lg" 
+              className="w-full md:w-auto" 
               variant="outline"
-              onClick={() => onSectionChange('mentor')}
+              onClick={handleJoinNextClass}
             >
-              <Bot className="mr-2 h-4 w-4" />
-              Ask AI Mentor
+              <Video className="mr-2 h-4 w-4" />
+              {nextClass ? 'Join Class' : 'View Classes'}
             </Button>
           </div>
         </CardContent>
       </Card>
 
-      {/* Quick Actions */}
+      {/* Notifications Widget */}
+      <Card ref={notificationsRef}>
+        <CardHeader>
+          <CardTitle>Notifications</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ul className="space-y-2 text-sm text-muted-foreground">
+            <li>Assignment "React Project" due tomorrow</li>
+            <li>Class "JS Live" starts at 4:00 PM</li>
+            <li>New message from your mentor</li>
+          </ul>
+        </CardContent>
+      </Card>
+
+      {/* Assignments Section */}
       <Card>
         <CardHeader>
-          <CardTitle>Quick Actions</CardTitle>
+          <CardTitle>My Assignments</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid md:grid-cols-4 gap-4">
-            <Button 
-              variant="outline" 
-              className="h-20 flex-col"
-              onClick={() => onSectionChange('roadmaps')}
-            >
-              <BookOpen className="h-6 w-6 mb-2" />
-              Browse Roadmaps
-            </Button>
-            <Button 
-              variant="outline" 
-              className="h-20 flex-col"
-              onClick={() => onSectionChange('resources')}
-            >
-              <BookOpen className="h-6 w-6 mb-2" />
-              Download PDFs
-            </Button>
-            <Button 
-              variant="outline" 
-              className="h-20 flex-col"
-              onClick={() => onSectionChange('community')}
-            >
-              <Users className="h-6 w-6 mb-2" />
-              Join Community
-            </Button>
-            <Button 
-              variant="outline" 
-              className="h-20 flex-col"
-              onClick={() => onSectionChange('mentor')}
-            >
-              <Bot className="h-6 w-6 mb-2" />
-              Ask AI Mentor
-            </Button>
-          </div>
+          <StudentAssignments />
         </CardContent>
       </Card>
+
+      {/* Minimal Stats Row */}
+      <div className="flex justify-between items-center bg-card/50 rounded-lg p-4 my-6">
+        <div className="flex flex-col items-center flex-1">
+          <span className="text-xs text-muted-foreground mb-1">XP</span>
+          <span className="text-xl font-bold">{user.xp}</span>
+        </div>
+        <div className="flex flex-col items-center flex-1">
+          <span className="text-xs text-muted-foreground mb-1">Streak</span>
+          <span className="text-xl font-bold text-orange-500">{user.streak}d</span>
+        </div>
+        <div className="flex flex-col items-center flex-1">
+          <span className="text-xs text-muted-foreground mb-1">Level</span>
+          <span className="text-xl font-bold text-purple-500">{user.level}</span>
+        </div>
+      </div>
+
+      {/* Quick Actions */}
+      <div ref={quickActionsRef} className="flex flex-col md:flex-row gap-4 justify-center">
+        <Button size="lg" className="flex-1" onClick={() => onSectionChange('sandbox')}>
+          Start Coding
+        </Button>
+        <Button size="lg" className="flex-1" variant="outline" onClick={() => onSectionChange('mentor')}>
+          Ask Mentor
+        </Button>
+        <Button size="lg" className="flex-1" variant="secondary" onClick={() => onSectionChange('live-classes')}>
+          <Video className="mr-2 h-4 w-4" />
+          Join Class
+        </Button>
+      </div>
     </div>
   );
 }

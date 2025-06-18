@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useLocation } from 'wouter';
 import { 
   Home, 
   Route, 
@@ -16,7 +17,8 @@ import {
   Flame,
   Star,
   Shield,
-  BarChart3
+  BarChart3,
+  Video
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { useUserRole } from '../contexts/UserRoleContext';
@@ -34,37 +36,68 @@ export function Sidebar({ currentSection, onSectionChange, onAuthModalOpen }: Si
   const { isAuthenticated, user, logout } = useAuth();
   const { isAdmin, isStudent } = useUserRole();
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [, setLocation] = useLocation();
 
-  const adminNavigation = [
-    { id: 'dashboard' as Section, icon: Home, label: 'Student Dashboard' },
-    { id: 'admin-dashboard' as Section, icon: Shield, label: 'Admin Dashboard', adminOnly: true },
-    { id: 'roadmaps' as Section, icon: Route, label: 'Learning Roadmaps' },
-    { id: 'resources' as Section, icon: FileText, label: 'PDF Resources' },
-    { id: 'videos' as Section, icon: Play, label: 'Video Library' },
-    { id: 'problems' as Section, icon: Puzzle, label: 'Daily Problems' },
-    { id: 'community' as Section, icon: Users, label: 'Community Lounge' },
-    { id: 'studio' as Section, icon: Code, label: 'Project Studio' },
-    { id: 'sandbox' as Section, icon: Code, label: 'App Sandbox' },
-    { id: 'mentor' as Section, icon: Bot, label: 'AI Mentor' },
-    { id: 'sphere-map' as Section, icon: Star, label: 'Sphere Map' }
-  ];
+  if (!isAuthenticated) {
+    return (
+      <div className="fixed left-0 top-0 h-full bg-sidebar-background border-r border-sidebar-border z-50 w-64 flex flex-col justify-between">
+        <div>
+          {/* Logo/Header */}
+          <div
+            className="flex items-center space-x-3 p-6 cursor-pointer select-none"
+            onClick={() => setLocation('/')}
+          >
+            <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+              <span className="text-primary-foreground font-bold text-lg">CS</span>
+            </div>
+            <div>
+              <h1 className="text-xl font-bold">CodeSphere</h1>
+            </div>
+          </div>
+          <div className="px-6 pb-2 text-xs text-muted-foreground font-semibold">Navigation</div>
+          <div className="flex flex-col gap-2 px-4 mt-2">
+            <button
+              onClick={() => onAuthModalOpen('login')}
+              className="flex items-center space-x-2 px-4 py-2 rounded-lg text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
+            >
+              <span>Login</span>
+            </button>
+            <button
+              onClick={() => onAuthModalOpen('register')}
+              className="flex items-center space-x-2 px-4 py-2 rounded-lg text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
+            >
+              <span>Register</span>
+            </button>
+          </div>
+        </div>
+        <div className="p-4 text-xs text-muted-foreground opacity-60">© CodeSphere</div>
+      </div>
+    );
+  }
 
-  const studentNavigation = [
+  const learningNavigation = [
     { id: 'dashboard' as Section, icon: Home, label: 'Dashboard' },
     { id: 'roadmaps' as Section, icon: Route, label: 'Learning Roadmaps' },
     { id: 'resources' as Section, icon: FileText, label: 'PDF Resources' },
     { id: 'videos' as Section, icon: Play, label: 'Video Library' },
     { id: 'problems' as Section, icon: Puzzle, label: 'Daily Problems' },
-    { id: 'community' as Section, icon: Users, label: 'Community Lounge' },
     { id: 'studio' as Section, icon: Code, label: 'Project Studio' },
     { id: 'sandbox' as Section, icon: Code, label: 'App Sandbox' },
     { id: 'mentor' as Section, icon: Bot, label: 'AI Mentor' },
     { id: 'sphere-map' as Section, icon: Star, label: 'Sphere Map' }
   ];
 
-  const navigation = isAdmin ? adminNavigation : studentNavigation;
+  const collaborationNavigation = [
+    { id: 'community' as Section, icon: Users, label: 'Community Lounge' },
+    { id: 'live-classes' as Section, icon: Video, label: 'Live Classes' }
+  ];
 
-  const bottomNavigation = [
+  const analyticsNavigation = [
+    { id: 'platform-analytics' as Section, icon: BarChart3, label: 'Analytics Dashboard' },
+    ...(isAdmin ? [{ id: 'admin-dashboard' as Section, icon: Shield, label: 'Admin Dashboard' }] : [])
+  ];
+
+  const profileNavigation = [
     { id: 'profile' as Section, icon: User, label: 'Profile' },
     { id: 'settings' as Section, icon: Settings, label: 'Settings' }
   ];
@@ -88,7 +121,10 @@ export function Sidebar({ currentSection, onSectionChange, onAuthModalOpen }: Si
         <div className="p-6">
           {/* Header */}
           <div className="flex items-center justify-between mb-8">
-            <div className="flex items-center space-x-3">
+            <div
+              className="flex items-center space-x-3 cursor-pointer select-none"
+              onClick={() => setLocation('/')}
+            >
               <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
                 <span className="text-primary-foreground font-bold text-lg">CS</span>
               </div>
@@ -158,42 +194,86 @@ export function Sidebar({ currentSection, onSectionChange, onAuthModalOpen }: Si
             </div>
           )}
 
-          {/* Navigation */}
-          <nav className="space-y-2">
-            {navigation.map((item) => (
-              <button
-                key={item.id}
-                onClick={() => onSectionChange(item.id)}
-                className={`sidebar-item w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left ${
-                  currentSection === item.id
-                    ? 'bg-primary text-primary-foreground'
-                    : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
-                }`}
-              >
-                <item.icon className="h-5 w-5 flex-shrink-0" />
-                <span>{item.label}</span>
-              </button>
-            ))}
-          </nav>
-
-          {/* Bottom Navigation */}
-          <div className="border-t border-sidebar-border mt-6 pt-6">
-            <nav className="space-y-2">
-              {bottomNavigation.map((item) => (
-                <button
-                  key={item.id}
-                  onClick={() => onSectionChange(item.id)}
-                  className={`sidebar-item w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left ${
-                    currentSection === item.id
-                      ? 'bg-primary text-primary-foreground'
-                      : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
-                  }`}
-                >
-                  <item.icon className="h-5 w-5 flex-shrink-0" />
-                  <span>{item.label}</span>
-                </button>
-              ))}
-            </nav>
+          {/* Navigation Groups */}
+          <div className="space-y-6">
+            <div>
+              <div className="px-6 pb-2 text-xs text-muted-foreground font-semibold uppercase tracking-wider">Learning</div>
+              <nav className="space-y-2">
+                {learningNavigation.map((item) => (
+                  <button
+                    key={item.id}
+                    onClick={() => onSectionChange(item.id)}
+                    className={`sidebar-item w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left ${
+                      currentSection === item.id
+                        ? 'bg-primary text-primary-foreground'
+                        : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
+                    }`}
+                  >
+                    <item.icon className="h-5 w-5 flex-shrink-0" />
+                    <span>{item.label}</span>
+                  </button>
+                ))}
+              </nav>
+            </div>
+            <div>
+              <div className="px-6 pb-2 text-xs text-muted-foreground font-semibold uppercase tracking-wider">Collaboration</div>
+              <nav className="space-y-2">
+                {collaborationNavigation.map((item) => (
+                  <button
+                    key={item.id}
+                    onClick={() => onSectionChange(item.id)}
+                    className={`sidebar-item w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left ${
+                      currentSection === item.id
+                        ? 'bg-primary text-primary-foreground'
+                        : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
+                    }`}
+                  >
+                    <item.icon className="h-5 w-5 flex-shrink-0" />
+                    <span>{item.label}</span>
+                  </button>
+                ))}
+              </nav>
+            </div>
+            {analyticsNavigation.length > 0 && (
+              <div>
+                <div className="px-6 pb-2 text-xs text-muted-foreground font-semibold uppercase tracking-wider">Analytics & Admin</div>
+                <nav className="space-y-2">
+                  {analyticsNavigation.map((item) => (
+                    <button
+                      key={item.id}
+                      onClick={() => onSectionChange(item.id)}
+                      className={`sidebar-item w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left ${
+                        currentSection === item.id
+                          ? 'bg-primary text-primary-foreground'
+                          : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
+                      }`}
+                    >
+                      <item.icon className="h-5 w-5 flex-shrink-0" />
+                      <span>{item.label}</span>
+                    </button>
+                  ))}
+                </nav>
+              </div>
+            )}
+            <div>
+              <div className="px-6 pb-2 text-xs text-muted-foreground font-semibold uppercase tracking-wider">Profile & Settings</div>
+              <nav className="space-y-2">
+                {profileNavigation.map((item) => (
+                  <button
+                    key={item.id}
+                    onClick={() => onSectionChange(item.id)}
+                    className={`sidebar-item w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left ${
+                      currentSection === item.id
+                        ? 'bg-primary text-primary-foreground'
+                        : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
+                    }`}
+                  >
+                    <item.icon className="h-5 w-5 flex-shrink-0" />
+                    <span>{item.label}</span>
+                  </button>
+                ))}
+              </nav>
+            </div>
           </div>
 
           {/* Theme Toggle */}

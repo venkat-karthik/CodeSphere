@@ -4,6 +4,36 @@ import {
   type Problem, type UserSolution, type CommunityPost, type InsertCommunityPost
 } from "@shared/schema";
 
+export interface LiveClass {
+  id: string;
+  title: string;
+  description: string;
+  instructorId: string;
+  instructorName: string;
+  startTime: string;
+  endTime: string;
+  status: 'scheduled' | 'live' | 'ended';
+  maxParticipants: number;
+  currentParticipants: number;
+  roomId: string;
+  isRecording: boolean;
+  tags: string[];
+  createdAt: string;
+}
+
+export interface InsertLiveClass {
+  title: string;
+  description: string;
+  instructorId: string;
+  instructorName: string;
+  startTime: string;
+  endTime: string;
+  maxParticipants: number;
+  tags: string[];
+  status: 'scheduled' | 'live' | 'ended';
+  roomId: string;
+}
+
 export interface IStorage {
   // User management
   getUser(id: number): Promise<User | undefined>;
@@ -37,6 +67,17 @@ export interface IStorage {
   getAllPosts(): Promise<CommunityPost[]>;
   getPostsByCategory(category: string): Promise<CommunityPost[]>;
   createPost(post: InsertCommunityPost): Promise<CommunityPost>;
+
+  // Live Classes
+  getAllLiveClasses(): Promise<LiveClass[]>;
+  getLiveClass(id: string): Promise<LiveClass | undefined>;
+  getLiveClassesByStatus(status: string): Promise<LiveClass[]>;
+  getLiveClassesByInstructor(instructorId: string): Promise<LiveClass[]>;
+  createLiveClass(liveClass: InsertLiveClass): Promise<LiveClass>;
+  updateLiveClass(id: string, updates: Partial<LiveClass>): Promise<LiveClass | undefined>;
+  deleteLiveClass(id: string): Promise<boolean>;
+  joinLiveClass(classId: string, userId: string, userName: string): Promise<{ success: boolean; message?: string; roomId?: string }>;
+  leaveLiveClass(classId: string, userId: string): Promise<void>;
 }
 
 export class MemStorage implements IStorage {
@@ -47,6 +88,7 @@ export class MemStorage implements IStorage {
   private problems: Map<number, Problem>;
   private userSolutions: Map<number, UserSolution>;
   private communityPosts: Map<number, CommunityPost>;
+  private liveClasses: Map<string, LiveClass>;
   private currentId: number;
 
   constructor() {
@@ -57,6 +99,7 @@ export class MemStorage implements IStorage {
     this.problems = new Map();
     this.userSolutions = new Map();
     this.communityPosts = new Map();
+    this.liveClasses = new Map();
     this.currentId = 1;
     this.initializeData();
   }
@@ -117,6 +160,52 @@ export class MemStorage implements IStorage {
       date: new Date()
     };
     this.problems.set(twoSumProblem.id, twoSumProblem);
+
+    // Initialize with sample live classes
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setHours(14, 0, 0, 0); // 2 PM tomorrow
+
+    const dayAfterTomorrow = new Date();
+    dayAfterTomorrow.setDate(dayAfterTomorrow.getDate() + 2);
+    dayAfterTomorrow.setHours(10, 0, 0, 0); // 10 AM day after tomorrow
+
+    const sampleLiveClass1: LiveClass = {
+      id: "class_sample_1",
+      title: "JavaScript Fundamentals Live Session",
+      description: "Join us for an interactive session covering JavaScript basics, ES6 features, and modern development practices. Perfect for beginners!",
+      instructorId: "1",
+      instructorName: "Sarah Chen",
+      startTime: tomorrow.toISOString(),
+      endTime: new Date(tomorrow.getTime() + 2 * 60 * 60 * 1000).toISOString(), // 2 hours later
+      status: 'scheduled',
+      maxParticipants: 30,
+      currentParticipants: 12,
+      roomId: "room_sample_1",
+      isRecording: false,
+      tags: ["JavaScript", "Beginner", "ES6"],
+      createdAt: new Date().toISOString()
+    };
+
+    const sampleLiveClass2: LiveClass = {
+      id: "class_sample_2",
+      title: "React Hooks Deep Dive",
+      description: "Advanced React concepts including custom hooks, context API, and performance optimization techniques.",
+      instructorId: "2",
+      instructorName: "Mike Rodriguez",
+      startTime: dayAfterTomorrow.toISOString(),
+      endTime: new Date(dayAfterTomorrow.getTime() + 1.5 * 60 * 60 * 1000).toISOString(), // 1.5 hours later
+      status: 'scheduled',
+      maxParticipants: 25,
+      currentParticipants: 8,
+      roomId: "room_sample_2",
+      isRecording: false,
+      tags: ["React", "Advanced", "Hooks"],
+      createdAt: new Date().toISOString()
+    };
+
+    this.liveClasses.set(sampleLiveClass1.id, sampleLiveClass1);
+    this.liveClasses.set(sampleLiveClass2.id, sampleLiveClass2);
   }
 
   async getUser(id: number): Promise<User | undefined> {
@@ -260,6 +349,88 @@ export class MemStorage implements IStorage {
     
     this.communityPosts.set(id, post);
     return post;
+  }
+
+  async getAllLiveClasses(): Promise<LiveClass[]> {
+    return Array.from(this.liveClasses.values());
+  }
+
+  async getLiveClass(id: string): Promise<LiveClass | undefined> {
+    return this.liveClasses.get(id);
+  }
+
+  async getLiveClassesByStatus(status: string): Promise<LiveClass[]> {
+    return Array.from(this.liveClasses.values()).filter(liveClass => 
+      liveClass.status === status
+    );
+  }
+
+  async getLiveClassesByInstructor(instructorId: string): Promise<LiveClass[]> {
+    return Array.from(this.liveClasses.values()).filter(liveClass => 
+      liveClass.instructorId === instructorId
+    );
+  }
+
+  async createLiveClass(liveClass: InsertLiveClass): Promise<LiveClass> {
+    const id = `class_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const newLiveClass: LiveClass = {
+      ...liveClass,
+      id,
+      currentParticipants: 0,
+      isRecording: false,
+      createdAt: new Date().toISOString()
+    };
+    
+    this.liveClasses.set(id, newLiveClass);
+    return newLiveClass;
+  }
+
+  async updateLiveClass(id: string, updates: Partial<LiveClass>): Promise<LiveClass | undefined> {
+    const liveClass = this.liveClasses.get(id);
+    if (!liveClass) return undefined;
+    
+    const updatedLiveClass = { ...liveClass, ...updates };
+    this.liveClasses.set(id, updatedLiveClass);
+    return updatedLiveClass;
+  }
+
+  async deleteLiveClass(id: string): Promise<boolean> {
+    const exists = this.liveClasses.has(id);
+    if (exists) {
+      this.liveClasses.delete(id);
+    }
+    return exists;
+  }
+
+  async joinLiveClass(classId: string, userId: string, userName: string): Promise<{ success: boolean; message?: string; roomId?: string }> {
+    const liveClass = this.liveClasses.get(classId);
+    
+    if (!liveClass) {
+      return { success: false, message: "Live class not found" };
+    }
+    
+    if (liveClass.status === 'ended') {
+      return { success: false, message: "This live class has ended" };
+    }
+    
+    if (liveClass.currentParticipants >= liveClass.maxParticipants) {
+      return { success: false, message: "Live class is full" };
+    }
+    
+    // Update participant count
+    liveClass.currentParticipants += 1;
+    this.liveClasses.set(classId, liveClass);
+    
+    return { success: true, roomId: liveClass.roomId };
+  }
+
+  async leaveLiveClass(classId: string, userId: string): Promise<void> {
+    const liveClass = this.liveClasses.get(classId);
+    
+    if (liveClass && liveClass.currentParticipants > 0) {
+      liveClass.currentParticipants -= 1;
+      this.liveClasses.set(classId, liveClass);
+    }
   }
 }
 

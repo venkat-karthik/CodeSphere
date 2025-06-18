@@ -5,21 +5,22 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserRole } from '@/contexts/UserRoleContext';
 import { 
   FileText, 
   Download, 
   Search, 
-  Filter,
   Upload,
   Plus,
-  X,
   File,
   Calendar,
   Eye,
   Star,
-  Clock
+  Clock,
+  Filter,
+  X
 } from 'lucide-react';
 import { storage } from '../lib/storage';
 
@@ -30,28 +31,26 @@ export function Resources() {
   
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [sortBy, setSortBy] = useState('newest');
   const [isUploading, setIsUploading] = useState(false);
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [newPdf, setNewPdf] = useState({
     title: '',
     description: '',
     category: '',
-    difficulty: 'beginner' as 'beginner' | 'intermediate' | 'advanced',
-    tags: ''
+    difficulty: 'beginner' as 'beginner' | 'intermediate' | 'advanced'
   });
   
   const [pdfs, setPdfs] = useState(storage.getPDFs());
   
   const categories = [
-    { id: 'all', label: 'All', count: pdfs.length },
-    { id: 'javascript', label: 'JavaScript', count: pdfs.filter(p => p.category === 'javascript').length },
-    { id: 'react', label: 'React', count: pdfs.filter(p => p.category === 'react').length },
-    { id: 'nodejs', label: 'Node.js', count: pdfs.filter(p => p.category === 'nodejs').length },
-    { id: 'css', label: 'CSS', count: pdfs.filter(p => p.category === 'css').length },
-    { id: 'html', label: 'HTML', count: pdfs.filter(p => p.category === 'html').length },
-    { id: 'typescript', label: 'TypeScript', count: pdfs.filter(p => p.category === 'typescript').length },
-    { id: 'python', label: 'Python', count: pdfs.filter(p => p.category === 'python').length }
+    { id: 'all', label: 'All' },
+    { id: 'javascript', label: 'JavaScript' },
+    { id: 'react', label: 'React' },
+    { id: 'nodejs', label: 'Node.js' },
+    { id: 'css', label: 'CSS' },
+    { id: 'html', label: 'HTML' },
+    { id: 'typescript', label: 'TypeScript' },
+    { id: 'python', label: 'Python' }
   ];
 
   const filteredPDFs = pdfs.filter(pdf => {
@@ -63,24 +62,24 @@ export function Resources() {
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
-      case 'beginner': return 'bg-green-500/20 text-green-400';
-      case 'intermediate': return 'bg-yellow-500/20 text-yellow-400';
-      case 'advanced': return 'bg-red-500/20 text-red-400';
-      default: return 'bg-gray-500/20 text-gray-400';
+      case 'beginner': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+      case 'intermediate': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
+      case 'advanced': return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
+      default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
     }
   };
 
   const getCategoryColor = (category: string) => {
     const colors: Record<string, string> = {
-      javascript: 'bg-yellow-500/20 text-yellow-400',
-      react: 'bg-blue-500/20 text-blue-400',
-      nodejs: 'bg-green-500/20 text-green-400',
-      css: 'bg-purple-500/20 text-purple-400',
-      html: 'bg-orange-500/20 text-orange-400',
-      typescript: 'bg-blue-600/20 text-blue-300',
-      python: 'bg-green-600/20 text-green-300'
+      javascript: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
+      react: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
+      nodejs: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+      css: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
+      html: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200',
+      typescript: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
+      python: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
     };
-    return colors[category] || 'bg-gray-500/20 text-gray-400';
+    return colors[category] || 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
   };
 
   const formatDate = (dateString: string) => {
@@ -95,8 +94,50 @@ export function Resources() {
     return `${Math.ceil(diffDays / 30)} months ago`;
   };
 
+  const handleUpload = () => {
+    if (!newPdf.title || !newPdf.category) {
+      alert('Please fill in all required fields');
+      return;
+    }
+    
+    fileInputRef.current?.click();
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && file.type === 'application/pdf') {
+      setIsUploading(true);
+      setTimeout(() => {
+        const newPdfData: PDFResource = {
+          id: Date.now().toString(),
+          title: newPdf.title,
+          description: newPdf.description,
+          category: newPdf.category,
+          difficulty: newPdf.difficulty as 'beginner' | 'intermediate' | 'advanced',
+          pages: 45,
+          size: '2.4 MB',
+          downloads: 0,
+          uploadDate: new Date().toISOString().split('T')[0],
+          tags: []
+        };
+        
+        setPdfs(prev => [newPdfData, ...prev]);
+        setIsUploading(false);
+        setShowUploadModal(false);
+        setNewPdf({ title: '', description: '', category: '', difficulty: 'beginner' });
+        alert('PDF uploaded successfully!');
+      }, 2000);
+    }
+  };
+
+  const handleDownload = (pdf: PDFResource) => {
+    // Simulate download
+    alert(`Downloading: ${pdf.title}`);
+    // In a real app, this would trigger an actual download
+  };
+
   return (
-    <div className="max-w-7xl mx-auto space-y-8">
+    <div className="max-w-7xl mx-auto space-y-6">
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
@@ -113,228 +154,68 @@ export function Resources() {
         )}
       </div>
 
-      {/* Admin Upload Modal */}
-      {isAdmin && showUploadModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <Card className="w-full max-w-md">
-            <CardHeader>
-              <div className="flex justify-between items-center">
-                <CardTitle>Upload New PDF</CardTitle>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowUploadModal(false)}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <label className="text-sm font-medium">Title</label>
-                <Input
-                  value={newPdf.title}
-                  onChange={(e) => setNewPdf(prev => ({ ...prev, title: e.target.value }))}
-                  placeholder="Enter PDF title"
-                />
-              </div>
-              
-              <div>
-                <label className="text-sm font-medium">Description</label>
-                <Textarea
-                  value={newPdf.description}
-                  onChange={(e) => setNewPdf(prev => ({ ...prev, description: e.target.value }))}
-                  placeholder="Enter PDF description"
-                  rows={3}
-                />
-              </div>
-              
-              <div>
-                <label className="text-sm font-medium">Category</label>
-                <Select value={newPdf.category} onValueChange={(value) => setNewPdf(prev => ({ ...prev, category: value }))}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="javascript">JavaScript</SelectItem>
-                    <SelectItem value="react">React</SelectItem>
-                    <SelectItem value="nodejs">Node.js</SelectItem>
-                    <SelectItem value="css">CSS</SelectItem>
-                    <SelectItem value="html">HTML</SelectItem>
-                    <SelectItem value="python">Python</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div>
-                <label className="text-sm font-medium">Difficulty</label>
-                <Select value={newPdf.difficulty} onValueChange={(value: any) => setNewPdf(prev => ({ ...prev, difficulty: value }))}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="beginner">Beginner</SelectItem>
-                    <SelectItem value="intermediate">Intermediate</SelectItem>
-                    <SelectItem value="advanced">Advanced</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div>
-                <label className="text-sm font-medium">Tags (comma-separated)</label>
-                <Input
-                  value={newPdf.tags}
-                  onChange={(e) => setNewPdf(prev => ({ ...prev, tags: e.target.value }))}
-                  placeholder="fundamentals, guide, reference"
-                />
-              </div>
-              
-              <div className="flex space-x-2">
-                <Button onClick={() => fileInputRef.current?.click()} className="flex-1" disabled={isUploading}>
-                  {isUploading ? (
-                    <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                      Uploading...
-                    </>
-                  ) : (
-                    <>
-                      <File className="h-4 w-4 mr-2" />
-                      Select PDF File
-                    </>
-                  )}
-                </Button>
-                <Button variant="outline" onClick={() => setShowUploadModal(false)}>
-                  Cancel
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
-
-      <input
-        type="file"
-        ref={fileInputRef}
-        onChange={(e) => {
-          const file = e.target.files?.[0];
-          if (file && file.type === 'application/pdf') {
-            setIsUploading(true);
-            setTimeout(() => {
-              const newPdfData = {
-                id: Date.now(),
-                title: newPdf.title || file.name.replace(/\.[^/.]+$/, ""),
-                description: newPdf.description,
-                category: newPdf.category || 'javascript',
-                difficulty: newPdf.difficulty,
-                downloadCount: 0,
-                uploadDate: new Date().toISOString(),
-                size: '2.4 MB',
-                pages: 45
-              };
-              
-              setPdfs(prev => [newPdfData, ...prev]);
-              setIsUploading(false);
-              setShowUploadModal(false);
-              setNewPdf({ title: '', description: '', category: '', difficulty: 'beginner', tags: '' });
-            }, 2000);
-          }
-        }}
-        accept=".pdf"
-        className="hidden"
-      />
-
       {/* Search and Filters */}
-      <Card>
-        <CardContent className="p-6">
-          <div className="flex flex-col lg:flex-row gap-4 mb-6">
-            <div className="flex-1 relative">
-              <Input
-                placeholder="Search PDFs..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            </div>
-            <div className="flex gap-2">
-              <select 
-                className="bg-background border border-border rounded-lg px-4 py-2 focus:outline-none focus:border-primary"
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-              >
-                <option value="newest">Newest First</option>
-                <option value="oldest">Oldest First</option>
-                <option value="downloads">Most Downloaded</option>
-                <option value="alphabetical">Alphabetical</option>
-              </select>
-              <Button variant="outline" size="icon">
-                <Filter className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-
-          {/* Category Filters */}
-          <div className="flex flex-wrap gap-2">
+      <div className="flex flex-col sm:flex-row gap-4">
+        <div className="flex-1 relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search PDFs..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10"
+          />
+        </div>
+        <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+          <SelectTrigger className="w-full sm:w-48">
+            <SelectValue placeholder="All Categories" />
+          </SelectTrigger>
+          <SelectContent>
             {categories.map((category) => (
-              <Button
-                key={category.id}
-                variant={selectedCategory === category.id ? "default" : "outline"}
-                size="sm"
-                onClick={() => setSelectedCategory(category.id)}
-                className="whitespace-nowrap"
-              >
+              <SelectItem key={category.id} value={category.id}>
                 {category.label}
-                {category.count > 0 && (
-                  <Badge variant="secondary" className="ml-2">
-                    {category.count}
-                  </Badge>
-                )}
-              </Button>
+              </SelectItem>
             ))}
-          </div>
-        </CardContent>
-      </Card>
+          </SelectContent>
+        </Select>
+      </div>
 
       {/* PDF Grid */}
       <div className="grid lg:grid-cols-3 md:grid-cols-2 gap-6">
         {filteredPDFs.map((pdf) => (
-          <Card key={pdf.id} className="card-hover">
+          <Card key={pdf.id} className="hover:shadow-lg transition-shadow cursor-pointer">
             <CardContent className="p-6">
               <div className="flex items-start justify-between mb-4">
-                <div className="w-12 h-12 bg-red-500/20 rounded-lg flex items-center justify-center">
-                  <FileText className="h-6 w-6 text-red-500" />
+                <div className="w-12 h-12 bg-red-100 dark:bg-red-900/20 rounded-lg flex items-center justify-center">
+                  <FileText className="h-6 w-6 text-red-600 dark:text-red-400" />
                 </div>
-                <Badge className={getCategoryColor(pdf.category)}>
+                <Badge className={getCategoryColor(pdf.category)} variant="outline">
                   {pdf.category}
                 </Badge>
               </div>
               
-              <h3 className="text-lg font-semibold mb-2">{pdf.title}</h3>
+              <h3 className="text-lg font-semibold mb-2 line-clamp-2">{pdf.title}</h3>
               <p className="text-muted-foreground text-sm mb-4 line-clamp-3">
                 {pdf.description}
               </p>
               
-              <div className="flex flex-wrap gap-2 mb-4">
-                <Badge className={getDifficultyColor(pdf.difficulty)}>
+              <div className="flex items-center gap-2 mb-4">
+                <Badge className={getDifficultyColor(pdf.difficulty)} variant="outline">
                   {pdf.difficulty}
                 </Badge>
-                {pdf.tags.map((tag) => (
-                  <Badge key={tag} variant="outline" className="text-xs">
-                    {tag}
-                  </Badge>
-                ))}
+                <span className="text-xs text-muted-foreground">
+                  {pdf.pages} pages • {pdf.size}
+                </span>
               </div>
               
-              <div className="flex justify-between items-center text-sm text-muted-foreground mb-4">
-                <span>{pdf.pages} pages • {pdf.size}</span>
-                <span>{pdf.downloads.toLocaleString()} downloads</span>
+              <div className="flex justify-between items-center text-xs text-muted-foreground mb-4">
+                <span>{pdf.downloads} downloads</span>
+                <span>{formatDate(pdf.uploadDate)}</span>
               </div>
               
-              <div className="text-xs text-muted-foreground mb-4">
-                Added {formatDate(pdf.uploadDate)}
-              </div>
-              
-              <Button className="w-full">
+              <Button 
+                className="w-full" 
+                onClick={() => handleDownload(pdf)}
+              >
                 <Download className="mr-2 h-4 w-4" />
                 Download
               </Button>
@@ -343,24 +224,110 @@ export function Resources() {
         ))}
       </div>
 
-      {/* Load More */}
-      {filteredPDFs.length === 0 ? (
+      {/* Empty State */}
+      {filteredPDFs.length === 0 && (
         <Card>
-          <CardContent className="p-8 text-center">
-            <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-semibold mb-2">No PDFs Found</h3>
-            <p className="text-muted-foreground">
+          <CardContent className="p-12 text-center">
+            <FileText className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-xl font-semibold mb-2">No PDFs Found</h3>
+            <p className="text-muted-foreground mb-4">
               Try adjusting your search terms or selected category.
             </p>
+            {isAdmin && (
+              <Button onClick={() => setShowUploadModal(true)}>
+                <Upload className="mr-2 h-4 w-4" />
+                Upload First PDF
+              </Button>
+            )}
           </CardContent>
         </Card>
-      ) : (
-        <div className="text-center">
-          <Button variant="outline">
-            Load More PDFs
-          </Button>
-        </div>
       )}
+
+      {/* Upload Modal */}
+      <Dialog open={showUploadModal} onOpenChange={setShowUploadModal}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Upload New PDF</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Title *</label>
+              <Input
+                value={newPdf.title}
+                onChange={(e) => setNewPdf(prev => ({ ...prev, title: e.target.value }))}
+                placeholder="Enter PDF title"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Description</label>
+              <Textarea
+                value={newPdf.description}
+                onChange={(e) => setNewPdf(prev => ({ ...prev, description: e.target.value }))}
+                placeholder="Enter PDF description"
+                rows={3}
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Category *</label>
+              <Select value={newPdf.category} onValueChange={(value) => setNewPdf(prev => ({ ...prev, category: value }))}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select category" />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.slice(1).map((category) => (
+                    <SelectItem key={category.id} value={category.id}>
+                      {category.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Difficulty</label>
+              <Select value={newPdf.difficulty} onValueChange={(value: any) => setNewPdf(prev => ({ ...prev, difficulty: value }))}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="beginner">Beginner</SelectItem>
+                  <SelectItem value="intermediate">Intermediate</SelectItem>
+                  <SelectItem value="advanced">Advanced</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowUploadModal(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleUpload} disabled={isUploading}>
+              {isUploading ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  Uploading...
+                </>
+              ) : (
+                <>
+                  <Upload className="mr-2 h-4 w-4" />
+                  Upload PDF
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Hidden file input */}
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleFileSelect}
+        accept=".pdf"
+        className="hidden"
+      />
     </div>
   );
 }

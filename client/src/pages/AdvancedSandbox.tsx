@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -37,6 +37,9 @@ import {
   Circle,
   Dot
 } from 'lucide-react';
+import MonacoEditor from '@monaco-editor/react';
+import { Terminal as XTerm } from 'xterm';
+import 'xterm/css/xterm.css';
 
 interface FileNode {
   id: string;
@@ -208,6 +211,51 @@ export default App;`
       ]
     }
   ]);
+
+  const terminalRef = useRef<HTMLDivElement>(null);
+  const xtermRef = useRef<XTerm | null>(null);
+
+  useEffect(() => {
+    if (terminalRef.current && !xtermRef.current) {
+      xtermRef.current = new XTerm({
+        theme: { background: '#18122B', foreground: '#C5BFFF' },
+        fontSize: 14,
+        rows: 10,
+      });
+      xtermRef.current.open(terminalRef.current);
+      xtermRef.current.writeln('Welcome to the Sandbox Terminal!');
+      xtermRef.current.write('$ ');
+      let command = '';
+      xtermRef.current.onKey(({ key, domEvent }) => {
+        if (domEvent.key === 'Enter') {
+          if (command.trim() !== '') {
+            xtermRef.current?.writeln('\r\n' + simulateCommand(command));
+          }
+          command = '';
+          xtermRef.current?.write('$ ');
+        } else if (domEvent.key === 'Backspace') {
+          if (command.length > 0) {
+            command = command.slice(0, -1);
+            xtermRef.current?.write('\b \b');
+          }
+        } else if (domEvent.key.length === 1) {
+          command += domEvent.key;
+          xtermRef.current?.write(domEvent.key);
+        }
+      });
+    }
+  }, []);
+
+  function simulateCommand(cmd: string) {
+    // Simulate a few commands, otherwise echo
+    if (cmd === 'help') return 'Available commands: help, clear, echo';
+    if (cmd === 'clear') {
+      xtermRef.current?.clear();
+      return '';
+    }
+    if (cmd.startsWith('echo ')) return cmd.slice(5);
+    return `Command not found: ${cmd}`;
+  }
 
   // File manipulation functions
   const updateFileContent = (fileId: string, newContent: string) => {
@@ -511,11 +559,12 @@ export default App;`
             </CardHeader>
             <CardContent className="flex-1 p-0">
               {activeTab ? (
-                <Textarea
+                <MonacoEditor
+                  height="60vh"
+                  language={activeTab.language}
                   value={activeTab.content}
-                  onChange={(e) => updateFileContent(activeTab.id, e.target.value)}
-                  className="w-full h-full resize-none border-0 font-mono text-sm"
-                  placeholder="Start coding..."
+                  theme="vs-dark"
+                  onChange={(value) => updateFileContent(activeTab.id, value || "")}
                 />
               ) : (
                 <div className="flex items-center justify-center h-full text-muted-foreground">
@@ -595,33 +644,7 @@ export default App;`
           </div>
         </CardHeader>
         <CardContent>
-          <div className="bg-black text-green-400 p-4 rounded-lg font-mono text-sm h-48 overflow-y-auto">
-            {consoleOutput.map((msg, index) => (
-              <div key={index} className={`mb-1 ${
-                msg.type === 'error' ? 'text-red-400' :
-                msg.type === 'warning' ? 'text-yellow-400' :
-                msg.type === 'success' ? 'text-green-400' :
-                msg.type === 'command' ? 'text-blue-400' :
-                'text-gray-300'
-              }`}>
-                {msg.message}
-              </div>
-            ))}
-            <div className="flex items-center">
-              <span className="text-green-400 mr-2">$</span>
-              <Input
-                value={terminalInput}
-                onChange={(e) => setTerminalInput(e.target.value)}
-                onKeyPress={(e) => {
-                  if (e.key === 'Enter') {
-                    executeTerminalCommand(terminalInput);
-                  }
-                }}
-                className="bg-transparent border-0 text-green-400 font-mono focus:ring-0 p-0"
-                placeholder="Type a command..."
-              />
-            </div>
-          </div>
+          <div ref={terminalRef} style={{ height: '200px', background: '#18122B', borderRadius: 8, marginTop: 16 }} />
         </CardContent>
       </Card>
     </div>

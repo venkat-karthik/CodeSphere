@@ -1,5 +1,5 @@
 import { User } from '@/types';
-import { getCurrentUser, setCurrentUser, clearCurrentUser, saveUser, findUserByEmail, updateUser } from './storage';
+import { storage } from './storage';
 
 export interface LoginCredentials {
   email: string;
@@ -21,12 +21,51 @@ export class AuthService {
       throw new Error('Email and password are required');
     }
 
-    const user = findUserByEmail(email, password);
+    // Demo accounts for easy testing
+    let user: User | null = null;
+    
+    if (email === 'admin@codesphere.com' && password === 'admin123') {
+      user = {
+        id: 'admin1',
+        firstName: 'Admin',
+        lastName: 'User',
+        email,
+        role: 'admin',
+        joinDate: new Date().toISOString(),
+        level: 10,
+        xp: 5000,
+        nextLevelXP: 10000,
+        streak: 30,
+        completedCourses: 15,
+        problemsSolved: 200
+      };
+    } else if (email === 'student@codesphere.com' && password === 'student123') {
+      user = {
+        id: 'student1',
+        firstName: 'Student',
+        lastName: 'User',
+        email,
+        role: 'student',
+        joinDate: new Date().toISOString(),
+        level: 5,
+        xp: 1250,
+        nextLevelXP: 2000,
+        streak: 7,
+        completedCourses: 3,
+        problemsSolved: 45
+      };
+    } else {
+      // Check existing users
+      const users = storage.getAllUsers();
+      user = users.find(u => u.email === email) || null;
+    }
+
     if (!user) {
       throw new Error('Invalid email or password');
     }
 
-    setCurrentUser(user);
+    storage.setCurrentUser(user);
+    storage.setAuthState(true);
     return user;
   }
 
@@ -38,65 +77,67 @@ export class AuthService {
     }
 
     // Check if user already exists
-    const existingUser = findUserByEmail(email, '');
+    const users = storage.getAllUsers();
+    const existingUser = users.find(u => u.email === email);
     if (existingUser) {
       throw new Error('An account with this email already exists');
     }
 
-    const newUser = saveUser({
+    const newUser: User = {
+      id: Date.now().toString(),
       firstName,
       lastName,
       email,
-      password,
+      role: 'student',
+      joinDate: new Date().toISOString(),
       level: 1,
       xp: 0,
+      nextLevelXP: 100,
       streak: 0,
-      totalXP: 0,
-      coursesCompleted: 0,
-      problemsSolved: 0,
-      joinDate: new Date().toISOString(),
-      isActive: true,
-    });
+      completedCourses: 0,
+      problemsSolved: 0
+    };
 
-    setCurrentUser(newUser);
+    storage.addUser(newUser);
+    storage.setCurrentUser(newUser);
+    storage.setAuthState(true);
     return newUser;
   }
 
   static logout(): void {
-    clearCurrentUser();
+    storage.setAuthState(false);
+    localStorage.removeItem('codesphere_user');
   }
 
   static getCurrentUser(): User | null {
-    return getCurrentUser();
+    return storage.getCurrentUser();
   }
 
   static isAuthenticated(): boolean {
-    return getCurrentUser() !== null;
+    return storage.getAuthState();
   }
 
   static async updateUserProgress(xpGained: number): Promise<User | null> {
-    const currentUser = getCurrentUser();
+    const currentUser = storage.getCurrentUser();
     if (!currentUser) return null;
 
     const newXP = currentUser.xp + xpGained;
-    const newTotalXP = currentUser.totalXP + xpGained;
-    
-    // Level up logic (every 1000 XP = new level)
-    const newLevel = Math.floor(newTotalXP / 1000) + 1;
+    const newLevel = Math.floor(newXP / 1000) + 1;
+    const newNextLevelXP = newLevel * 1000;
     
     const updatedUser: User = {
       ...currentUser,
-      xp: newXP % 1000, // Current level progress
-      totalXP: newTotalXP,
+      xp: newXP,
       level: newLevel,
+      nextLevelXP: newNextLevelXP,
     };
 
-    updateUser(updatedUser);
+    storage.updateUser(updatedUser);
     return updatedUser;
   }
 
   static async incrementStreak(): Promise<User | null> {
-    const currentUser = getCurrentUser();
+    const currentUser = storage.getCurrentUser();
     if (!currentUser) return null;
 
     const updatedUser: User = {
@@ -104,12 +145,12 @@ export class AuthService {
       streak: currentUser.streak + 1,
     };
 
-    updateUser(updatedUser);
+    storage.updateUser(updatedUser);
     return updatedUser;
   }
 
   static async incrementProblemsSolved(): Promise<User | null> {
-    const currentUser = getCurrentUser();
+    const currentUser = storage.getCurrentUser();
     if (!currentUser) return null;
 
     const updatedUser: User = {
@@ -117,20 +158,20 @@ export class AuthService {
       problemsSolved: currentUser.problemsSolved + 1,
     };
 
-    updateUser(updatedUser);
+    storage.updateUser(updatedUser);
     return updatedUser;
   }
 
   static async incrementCoursesCompleted(): Promise<User | null> {
-    const currentUser = getCurrentUser();
+    const currentUser = storage.getCurrentUser();
     if (!currentUser) return null;
 
     const updatedUser: User = {
       ...currentUser,
-      coursesCompleted: currentUser.coursesCompleted + 1,
+      completedCourses: currentUser.completedCourses + 1,
     };
 
-    updateUser(updatedUser);
+    storage.updateUser(updatedUser);
     return updatedUser;
   }
 }

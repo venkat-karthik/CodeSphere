@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
@@ -33,7 +34,16 @@ import {
   Smartphone,
   Mail,
   MessageSquare,
-  Zap
+  Zap,
+  Star,
+  Code,
+  Zap as Lightning,
+  Leaf,
+  Waves,
+  Sunset,
+  SquareDot,
+  Sparkles,
+  Minus
 } from 'lucide-react';
 
 export function EnhancedSettings() {
@@ -349,31 +359,137 @@ export function EnhancedSettings() {
               <CardContent className="space-y-4">
                 <div className="space-y-3">
                   <Label>Theme</Label>
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-3 md:grid-cols-4 gap-3">
                     <Button
                       variant={theme === 'light' ? 'default' : 'outline'}
                       onClick={() => setTheme('light')}
-                      className="flex flex-col items-center space-y-2 h-auto py-3"
+                      className="flex flex-col items-center space-y-2 h-auto py-4"
                     >
-                      <Sun className="h-4 w-4" />
+                      <Sun className="h-5 w-5" />
                       <span className="text-xs">Light</span>
                     </Button>
                     <Button
                       variant={theme === 'dark' ? 'default' : 'outline'}
                       onClick={() => setTheme('dark')}
-                      className="flex flex-col items-center space-y-2 h-auto py-3"
+                      className="flex flex-col items-center space-y-2 h-auto py-4"
                     >
-                      <Moon className="h-4 w-4" />
+                      <Moon className="h-5 w-5" />
                       <span className="text-xs">Dark</span>
                     </Button>
                     <Button
                       variant={theme === 'system' ? 'default' : 'outline'}
                       onClick={() => setTheme('system' as any)}
-                      className="flex flex-col items-center space-y-2 h-auto py-3"
+                      className="flex flex-col items-center space-y-2 h-auto py-4"
                     >
-                      <Monitor className="h-4 w-4" />
+                      <Monitor className="h-5 w-5" />
                       <span className="text-xs">System</span>
                     </Button>
+                    <Button
+                      variant={theme === 'star-trek' ? 'default' : 'outline'}
+                      onClick={() => setTheme('star-trek' as any)}
+                      className="flex flex-col items-center space-y-2 h-auto py-4 glow"
+                    >
+                      <Star className="h-5 w-5" />
+                      <span className="text-xs">Star Trek</span>
+                    </Button>
+                    <Button
+                      variant={theme === 'coding-vibe' ? 'default' : 'outline'}
+                      onClick={() => setTheme('coding-vibe' as any)}
+                      className="flex flex-col items-center space-y-2 h-auto py-4 terminal-glow"
+                    >
+                      <Code className="h-5 w-5" />
+                      <span className="text-xs">Coding Vibe</span>
+                    </Button>
+                    <Button
+                      variant={theme === 'cyberpunk' ? 'default' : 'outline'}
+                      onClick={() => setTheme('cyberpunk' as any)}
+                      className="flex flex-col items-center space-y-2 h-auto py-4 neon-glow"
+                    >
+                      <Lightning className="h-5 w-5" />
+                      <span className="text-xs">Cyberpunk</span>
+                    </Button>
+                    <Button
+                      variant={theme === 'nature' ? 'default' : 'outline'}
+                      onClick={() => setTheme('nature' as any)}
+                      className="flex flex-col items-center space-y-2 h-auto py-4"
+                    >
+                      <Leaf className="h-5 w-5" />
+                      <span className="text-xs">Nature</span>
+                    </Button>
+                    <Button
+                      variant={theme === 'ocean' ? 'default' : 'outline'}
+                      onClick={() => setTheme('ocean' as any)}
+                      className="flex flex-col items-center space-y-2 h-auto py-4"
+                    >
+                      <Waves className="h-5 w-5" />
+                      <span className="text-xs">Ocean</span>
+                    </Button>
+                    <Button
+                      variant={theme === 'sunset' ? 'default' : 'outline'}
+                      onClick={() => setTheme('sunset' as any)}
+                      className="flex flex-col items-center space-y-2 h-auto py-4"
+                    >
+                      <Sunset className="h-5 w-5" />
+                      <span className="text-xs">Sunset</span>
+                    </Button>
+                    <Button
+                      variant={theme === 'matrix' ? 'default' : 'outline'}
+                      onClick={() => setTheme('matrix' as any)}
+                      className="flex flex-col items-center space-y-2 h-auto py-4 matrix-glow"
+                    >
+                      <SquareDot className="h-5 w-5" />
+                      <span className="text-xs">Matrix</span>
+                    </Button>
+                    <Button
+                      variant={theme === 'retro' ? 'default' : 'outline'}
+                      onClick={() => setTheme('retro' as any)}
+                      className="flex flex-col items-center space-y-2 h-auto py-4 retro-glow"
+                    >
+                      <Sparkles className="h-5 w-5" />
+                      <span className="text-xs">Retro</span>
+                    </Button>
+                    <Button
+                      variant={theme === 'minimal' ? 'default' : 'outline'}
+                      onClick={() => setTheme('minimal' as any)}
+                      className="flex flex-col items-center space-y-2 h-auto py-4"
+                    >
+                      <Minus className="h-5 w-5" />
+                      <span className="text-xs">Minimal</span>
+                    </Button>
+                  </div>
+                  
+                  {/* Theme Descriptions */}
+                  <div className="mt-4 p-4 bg-muted rounded-lg">
+                    <h4 className="font-semibold mb-2">Theme Descriptions</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <strong>Star Trek:</strong> Futuristic blue and gold theme inspired by the iconic sci-fi series
+                      </div>
+                      <div>
+                        <strong>Coding Vibe:</strong> Classic terminal green on black for that authentic hacker feel
+                      </div>
+                      <div>
+                        <strong>Cyberpunk:</strong> Neon cyan and purple with high contrast for a dystopian future look
+                      </div>
+                      <div>
+                        <strong>Nature:</strong> Warm earth tones with forest green accents for a natural feel
+                      </div>
+                      <div>
+                        <strong>Ocean:</strong> Deep blue tones with turquoise highlights like the deep sea
+                      </div>
+                      <div>
+                        <strong>Sunset:</strong> Warm orange and amber gradients inspired by golden hour
+                      </div>
+                      <div>
+                        <strong>Matrix:</strong> Pure black with bright green text for that digital rain effect
+                      </div>
+                      <div>
+                        <strong>Retro:</strong> Bright 80s-inspired colors with yellow and pink accents
+                      </div>
+                      <div>
+                        <strong>Minimal:</strong> Clean black and white design for maximum focus
+                      </div>
+                    </div>
                   </div>
                 </div>
 
@@ -439,11 +555,15 @@ export function EnhancedSettings() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="dark">Dark</SelectItem>
-                      <SelectItem value="light">Light</SelectItem>
-                      <SelectItem value="high-contrast">High Contrast</SelectItem>
+                      <SelectItem value="vs-dark">VS Dark</SelectItem>
+                      <SelectItem value="vs-light">VS Light</SelectItem>
+                      <SelectItem value="hc-black">High Contrast</SelectItem>
                       <SelectItem value="monokai">Monokai</SelectItem>
+                      <SelectItem value="solarized-dark">Solarized Dark</SelectItem>
+                      <SelectItem value="solarized-light">Solarized Light</SelectItem>
+                      <SelectItem value="dracula">Dracula</SelectItem>
                       <SelectItem value="github">GitHub</SelectItem>
+                      {/* Add more custom themes here in the future */}
                     </SelectContent>
                   </Select>
                 </div>
@@ -483,6 +603,134 @@ export function EnhancedSettings() {
                       checked={preferences.minimap}
                       onCheckedChange={(checked) => setPreferences({ ...preferences, minimap: checked })}
                     />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Theme Preview */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <Palette className="h-5 w-5" />
+                  <span>Theme Preview</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <p className="text-sm text-muted-foreground">
+                    Preview how your selected theme looks with sample content:
+                  </p>
+                  
+                  {/* Live Theme Preview */}
+                  <div className="border rounded-lg p-4 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-semibold">Sample Card</h4>
+                      <Button size="sm" variant="outline">
+                        Action
+                      </Button>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      This is how text and interactive elements will appear in your selected theme.
+                    </p>
+                    <div className="flex items-center space-x-2">
+                      <Badge variant="default">Primary</Badge>
+                      <Badge variant="secondary">Secondary</Badge>
+                      <Badge variant="outline">Outline</Badge>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Button size="sm">Primary</Button>
+                      <Button size="sm" variant="secondary">Secondary</Button>
+                      <Button size="sm" variant="outline">Outline</Button>
+                    </div>
+                  </div>
+                  
+                  {/* Theme Features */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                    <div className="space-y-2">
+                      <h5 className="font-medium">Current Theme Features:</h5>
+                      <ul className="space-y-1 text-muted-foreground">
+                        {theme === 'star-trek' && (
+                          <>
+                            <li>• Futuristic blue and gold color scheme</li>
+                            <li>• Glowing effects on interactive elements</li>
+                            <li>• Inspired by Star Trek's Enterprise bridge</li>
+                          </>
+                        )}
+                        {theme === 'coding-vibe' && (
+                          <>
+                            <li>• Classic terminal green on black</li>
+                            <li>• Authentic hacker aesthetic</li>
+                            <li>• Terminal-style glow effects</li>
+                          </>
+                        )}
+                        {theme === 'cyberpunk' && (
+                          <>
+                            <li>• Neon cyan and purple highlights</li>
+                            <li>• High contrast dystopian future look</li>
+                            <li>• Neon glow effects on elements</li>
+                          </>
+                        )}
+                        {theme === 'nature' && (
+                          <>
+                            <li>• Warm earth tones and forest greens</li>
+                            <li>• Natural, calming color palette</li>
+                            <li>• Organic, nature-inspired design</li>
+                          </>
+                        )}
+                        {theme === 'ocean' && (
+                          <>
+                            <li>• Deep blue tones with turquoise accents</li>
+                            <li>• Underwater-inspired color scheme</li>
+                            <li>• Calming oceanic atmosphere</li>
+                          </>
+                        )}
+                        {theme === 'sunset' && (
+                          <>
+                            <li>• Warm orange and amber gradients</li>
+                            <li>• Golden hour inspired colors</li>
+                            <li>• Cozy, warm atmosphere</li>
+                          </>
+                        )}
+                        {theme === 'matrix' && (
+                          <>
+                            <li>• Pure black with bright green text</li>
+                            <li>• Digital rain effect</li>
+                          </>
+                        )}
+                        {theme === 'retro' && (
+                          <>
+                            <li>• Bright 80s-inspired colors</li>
+                            <li>• Yellow and pink neon accents</li>
+                            <li>• Vintage retro gaming aesthetic</li>
+                          </>
+                        )}
+                        {theme === 'minimal' && (
+                          <>
+                            <li>• Clean black and white design</li>
+                            <li>• Maximum focus and clarity</li>
+                            <li>• Minimalist aesthetic</li>
+                          </>
+                        )}
+                        {(theme === 'light' || theme === 'dark') && (
+                          <>
+                            <li>• Standard light/dark theme</li>
+                            <li>• Clean and professional look</li>
+                            <li>• Familiar interface design</li>
+                          </>
+                        )}
+                      </ul>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <h5 className="font-medium">Theme Tips:</h5>
+                      <ul className="space-y-1 text-muted-foreground">
+                        <li>• Themes automatically save to your preferences</li>
+                        <li>• Each theme has unique visual effects</li>
+                        <li>• Some themes work better in different lighting</li>
+                        <li>• You can switch themes anytime from the top bar</li>
+                      </ul>
+                    </div>
                   </div>
                 </div>
               </CardContent>

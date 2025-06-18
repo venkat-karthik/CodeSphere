@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
-type Theme = 'light' | 'dark';
+type Theme = 'light' | 'dark' | 'system' | 'star-trek' | 'coding-vibe' | 'cyberpunk' | 'nature' | 'ocean' | 'sunset' | 'matrix' | 'retro' | 'minimal';
 
 interface ThemeContextType {
   theme: Theme;
@@ -31,7 +31,15 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
   useEffect(() => {
     // Apply theme to document
     const root = document.documentElement;
-    root.classList.remove('light', 'dark');
+    
+    // Remove all theme classes
+    root.classList.remove(
+      'light', 'dark', 'system',
+      'star-trek', 'coding-vibe', 'cyberpunk', 'nature', 
+      'ocean', 'sunset', 'matrix', 'retro', 'minimal'
+    );
+    
+    // Add the current theme class
     root.classList.add(theme);
     
     // Save to localStorage

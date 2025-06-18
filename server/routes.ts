@@ -243,6 +243,130 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Live Classes routes
+  app.get("/api/live-classes", async (req, res) => {
+    try {
+      const { status, instructorId } = req.query;
+      
+      let classes;
+      if (status && typeof status === 'string') {
+        classes = await storage.getLiveClassesByStatus(status);
+      } else if (instructorId && typeof instructorId === 'string') {
+        classes = await storage.getLiveClassesByInstructor(instructorId);
+      } else {
+        classes = await storage.getAllLiveClasses();
+      }
+      
+      res.json(classes);
+    } catch (error) {
+      console.error("Get live classes error:", error);
+      res.status(500).json({ message: "Failed to get live classes" });
+    }
+  });
+
+  app.get("/api/live-classes/:id", async (req, res) => {
+    try {
+      const classId = req.params.id;
+      const liveClass = await storage.getLiveClass(classId);
+      
+      if (!liveClass) {
+        return res.status(404).json({ message: "Live class not found" });
+      }
+      
+      res.json(liveClass);
+    } catch (error) {
+      console.error("Get live class error:", error);
+      res.status(500).json({ message: "Failed to get live class" });
+    }
+  });
+
+  app.post("/api/live-classes", async (req, res) => {
+    try {
+      const { title, description, instructorId, instructorName, startTime, endTime, maxParticipants, tags } = req.body;
+      
+      const liveClass = await storage.createLiveClass({
+        title,
+        description,
+        instructorId,
+        instructorName,
+        startTime,
+        endTime,
+        maxParticipants: maxParticipants || 50,
+        tags: tags || [],
+        status: 'scheduled',
+        roomId: `room_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+      });
+      
+      res.status(201).json(liveClass);
+    } catch (error) {
+      console.error("Create live class error:", error);
+      res.status(400).json({ message: "Invalid live class data" });
+    }
+  });
+
+  app.patch("/api/live-classes/:id", async (req, res) => {
+    try {
+      const classId = req.params.id;
+      const updates = req.body;
+      
+      const updatedClass = await storage.updateLiveClass(classId, updates);
+      if (!updatedClass) {
+        return res.status(404).json({ message: "Live class not found" });
+      }
+      
+      res.json(updatedClass);
+    } catch (error) {
+      console.error("Update live class error:", error);
+      res.status(500).json({ message: "Failed to update live class" });
+    }
+  });
+
+  app.delete("/api/live-classes/:id", async (req, res) => {
+    try {
+      const classId = req.params.id;
+      const deleted = await storage.deleteLiveClass(classId);
+      
+      if (!deleted) {
+        return res.status(404).json({ message: "Live class not found" });
+      }
+      
+      res.json({ message: "Live class deleted successfully" });
+    } catch (error) {
+      console.error("Delete live class error:", error);
+      res.status(500).json({ message: "Failed to delete live class" });
+    }
+  });
+
+  app.post("/api/live-classes/:id/join", async (req, res) => {
+    try {
+      const classId = req.params.id;
+      const { userId, userName } = req.body;
+      
+      const result = await storage.joinLiveClass(classId, userId, userName);
+      if (!result.success) {
+        return res.status(400).json({ message: result.message });
+      }
+      
+      res.json({ message: "Joined live class successfully", roomId: result.roomId });
+    } catch (error) {
+      console.error("Join live class error:", error);
+      res.status(500).json({ message: "Failed to join live class" });
+    }
+  });
+
+  app.post("/api/live-classes/:id/leave", async (req, res) => {
+    try {
+      const classId = req.params.id;
+      const { userId } = req.body;
+      
+      await storage.leaveLiveClass(classId, userId);
+      res.json({ message: "Left live class successfully" });
+    } catch (error) {
+      console.error("Leave live class error:", error);
+      res.status(500).json({ message: "Failed to leave live class" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

@@ -34,6 +34,8 @@ import {
   ExternalLink,
   Eye
 } from 'lucide-react';
+import { ProfileAchievements } from '@/components/ProfileAchievements';
+import { ProgressTracker } from '@/components/ProgressTracker';
 
 interface Achievement {
   id: string;
@@ -282,7 +284,10 @@ export function EnhancedProfile() {
   const progressPercentage = (userStats.xp / userStats.nextLevelXP) * 100;
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6">
+    <div className="max-w-5xl mx-auto space-y-8">
+      {/* Profile Achievements and Progress Tracker */}
+      <ProfileAchievements />
+      <ProgressTracker />
       {/* Profile Header */}
       <Card>
         <CardContent className="p-6">

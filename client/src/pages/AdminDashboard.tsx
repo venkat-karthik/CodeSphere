@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -7,22 +7,27 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   Users, 
   BookOpen, 
+  Target, 
+  BarChart3, 
   TrendingUp, 
-  Award,
-  Search,
-  Filter,
-  Download,
-  Plus,
-  Eye,
-  Edit,
-  Trash2,
-  BarChart3,
-  PieChart,
-  Activity,
+  Activity, 
+  Award, 
+  Plus, 
+  Search, 
+  Filter, 
+  Eye, 
+  Edit, 
+  Trash2, 
   User,
   Play,
-  Target
+  Bot,
+  Download
 } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { AssignmentManager } from '@/components/AssignmentManager';
+import { AssistantManagement } from './AssistantManagement';
+import { AdminAnalytics } from '@/components/AdminAnalytics';
+import { ContentManagement } from './ContentManagement';
 
 interface Student {
   id: number;
@@ -51,40 +56,7 @@ export function AdminDashboard() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTab, setSelectedTab] = useState('overview');
   const [selectedTimeframe, setSelectedTimeframe] = useState('7d');
-  
-  const companyGrowthData = [
-    { month: 'Jan', revenue: 12000, students: 150, courses: 8 },
-    { month: 'Feb', revenue: 15000, students: 200, courses: 12 },
-    { month: 'Mar', revenue: 18000, students: 280, courses: 15 },
-    { month: 'Apr', revenue: 22000, students: 350, courses: 18 },
-    { month: 'May', revenue: 28000, students: 420, courses: 22 },
-    { month: 'Jun', revenue: 35000, students: 520, courses: 28 }
-  ];
-
-  const exportAnalytics = () => {
-    const csvData = [
-      ['Metric', 'Value'],
-      ['Total Students', '520'],
-      ['Active Students', '384'],
-      ['Average Study Time', '4.2 hours'],
-      ['Course Completion Rate', '78%'],
-      ['Monthly Revenue', '$35,000'],
-      ['Student Satisfaction', '4.8/5'],
-      ['Platform Uptime', '99.9%']
-    ];
-    
-    const csvContent = csvData.map(row => row.join(',')).join('\n');
-    const blob = new Blob([csvContent], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `codesphere-analytics-${new Date().toISOString().split('T')[0]}.csv`;
-    a.click();
-    window.URL.revokeObjectURL(url);
-  };
-
-  // Mock student data - in real app this would come from your database
-  const students: Student[] = [
+  const [studentsState, setStudentsState] = useState([
     {
       id: 1,
       name: 'Alex Johnson',
@@ -124,18 +96,52 @@ export function AdminDashboard() {
       totalStudyTime: 95,
       subscriptionType: 'free'
     }
+  ]);
+  const [addModalOpen, setAddModalOpen] = useState(false);
+  const [newStudent, setNewStudent] = useState({ name: '', email: '' });
+  const [addError, setAddError] = useState('');
+  
+  const companyGrowthData = [
+    { month: 'Jan', revenue: 12000, students: 150, courses: 8 },
+    { month: 'Feb', revenue: 15000, students: 200, courses: 12 },
+    { month: 'Mar', revenue: 18000, students: 280, courses: 15 },
+    { month: 'Apr', revenue: 22000, students: 350, courses: 18 },
+    { month: 'May', revenue: 28000, students: 420, courses: 22 },
+    { month: 'Jun', revenue: 35000, students: 520, courses: 28 }
   ];
+
+  const exportAnalytics = () => {
+    const csvData = [
+      ['Metric', 'Value'],
+      ['Total Students', '520'],
+      ['Active Students', '384'],
+      ['Average Study Time', '4.2 hours'],
+      ['Course Completion Rate', '78%'],
+      ['Monthly Revenue', '$35,000'],
+      ['Student Satisfaction', '4.8/5'],
+      ['Platform Uptime', '99.9%']
+    ];
+    
+    const csvContent = csvData.map(row => row.join(',')).join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `codesphere-analytics-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+  };
 
   const analytics: AnalyticsData = {
     totalStudents: 1247,
     activeStudents: 892,
     averageStudyTime: 156,
     completionRate: 78,
-    topPerformers: students.slice(0, 3),
+    topPerformers: studentsState.slice(0, 3),
     weeklyEngagement: [65, 72, 68, 85, 90, 88, 92]
   };
 
-  const filteredStudents = students.filter(student =>
+  const filteredStudents = studentsState.filter(student =>
     student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     student.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -155,8 +161,34 @@ export function AdminDashboard() {
     return `${hours}h ${mins}m`;
   };
 
+  const handleAddStudent = () => {
+    if (!newStudent.name.trim() || !newStudent.email.trim()) {
+      setAddError('Name and email are required.');
+      return;
+    }
+    setStudentsState(prev => [
+      ...prev,
+      {
+        id: Date.now(),
+        name: newStudent.name,
+        email: newStudent.email,
+        level: 1,
+        xp: 0,
+        streak: 0,
+        coursesCompleted: 0,
+        problemsSolved: 0,
+        lastActive: new Date(),
+        totalStudyTime: 0,
+        subscriptionType: 'free',
+      },
+    ]);
+    setNewStudent({ name: '', email: '' });
+    setAddError('');
+    setAddModalOpen(false);
+  };
+
   return (
-    <div className="max-w-7xl mx-auto space-y-8">
+    <div className="space-y-8 px-8 py-6">
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
@@ -170,12 +202,47 @@ export function AdminDashboard() {
             <Download className="mr-2 h-4 w-4" />
             Export Data
           </Button>
-          <Button>
+          <Button onClick={() => setAddModalOpen(true)}>
             <Plus className="mr-2 h-4 w-4" />
             Add Student
           </Button>
         </div>
       </div>
+
+      {/* Add Student Modal */}
+      <Dialog open={addModalOpen} onOpenChange={setAddModalOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Add New Student</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4 max-h-[80vh] overflow-y-auto">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <label htmlFor="name" className="text-right">Name</label>
+              <Input
+                id="name"
+                value={newStudent.name}
+                onChange={(e) => setNewStudent({ ...newStudent, name: e.target.value })}
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <label htmlFor="email" className="text-right">Email</label>
+              <Input
+                id="email"
+                type="email"
+                value={newStudent.email}
+                onChange={(e) => setNewStudent({ ...newStudent, email: e.target.value })}
+                className="col-span-3"
+              />
+            </div>
+            {addError && <div className="text-red-500 text-sm col-span-4 text-center">{addError}</div>}
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => setAddModalOpen(false)}>Cancel</Button>
+            <Button onClick={handleAddStudent}>Add Student</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Company Growth Overview */}
       <Card className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 border-blue-200 dark:border-blue-800">
@@ -279,9 +346,11 @@ export function AdminDashboard() {
 
       {/* Main Content Tabs */}
       <Tabs value={selectedTab} onValueChange={setSelectedTab}>
-        <TabsList>
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="students">Student Management</TabsTrigger>
+          <TabsTrigger value="assignments">Assignment Management</TabsTrigger>
+          <TabsTrigger value="assistants">Assistant Management</TabsTrigger>
           <TabsTrigger value="analytics">Analytics</TabsTrigger>
           <TabsTrigger value="content">Content Management</TabsTrigger>
         </TabsList>
@@ -320,7 +389,7 @@ export function AdminDashboard() {
 
           {/* Quick Actions */}
           <div className="grid md:grid-cols-3 gap-6">
-            <Card className="cursor-pointer hover:bg-muted/50 transition-colors">
+            <Card className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => setSelectedTab('content')}>
               <CardContent className="p-6 text-center">
                 <Plus className="h-8 w-8 text-primary mx-auto mb-2" />
                 <h3 className="font-semibold mb-1">Upload Content</h3>
@@ -328,7 +397,7 @@ export function AdminDashboard() {
               </CardContent>
             </Card>
 
-            <Card className="cursor-pointer hover:bg-muted/50 transition-colors">
+            <Card className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => setSelectedTab('analytics')}>
               <CardContent className="p-6 text-center">
                 <BarChart3 className="h-8 w-8 text-primary mx-auto mb-2" />
                 <h3 className="font-semibold mb-1">Generate Report</h3>
@@ -336,7 +405,7 @@ export function AdminDashboard() {
               </CardContent>
             </Card>
 
-            <Card className="cursor-pointer hover:bg-muted/50 transition-colors">
+            <Card className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => setSelectedTab('students')}>
               <CardContent className="p-6 text-center">
                 <Users className="h-8 w-8 text-primary mx-auto mb-2" />
                 <h3 className="font-semibold mb-1">Manage Users</h3>
@@ -426,100 +495,20 @@ export function AdminDashboard() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="analytics" className="space-y-6">
-          <div className="grid lg:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Weekly Engagement</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="h-64 flex items-end justify-between space-x-2">
-                  {analytics.weeklyEngagement.map((value, index) => (
-                    <div key={index} className="flex-1 bg-primary/20 rounded-t" style={{ height: `${value}%` }}>
-                      <div className="text-xs text-center mt-2">{['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][index]}</div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+        <TabsContent value="assignments" className="space-y-6 w-full">
+          <AssignmentManager />
+        </TabsContent>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Learning Progress Distribution</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <span>Beginner (Level 1-3)</span>
-                    <span className="font-semibold">45%</span>
-                  </div>
-                  <div className="w-full bg-muted rounded-full h-2">
-                    <div className="bg-green-500 h-2 rounded-full" style={{ width: '45%' }} />
-                  </div>
-                  
-                  <div className="flex justify-between items-center">
-                    <span>Intermediate (Level 4-7)</span>
-                    <span className="font-semibold">35%</span>
-                  </div>
-                  <div className="w-full bg-muted rounded-full h-2">
-                    <div className="bg-yellow-500 h-2 rounded-full" style={{ width: '35%' }} />
-                  </div>
-                  
-                  <div className="flex justify-between items-center">
-                    <span>Advanced (Level 8+)</span>
-                    <span className="font-semibold">20%</span>
-                  </div>
-                  <div className="w-full bg-muted rounded-full h-2">
-                    <div className="bg-red-500 h-2 rounded-full" style={{ width: '20%' }} />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+        <TabsContent value="assistants" className="space-y-6 w-full">
+          <AssistantManagement />
+        </TabsContent>
+
+        <TabsContent value="analytics" className="space-y-6">
+          <AdminAnalytics />
         </TabsContent>
 
         <TabsContent value="content" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Content Management</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <Card className="cursor-pointer hover:bg-muted/50 transition-colors">
-                  <CardContent className="p-6 text-center">
-                    <BookOpen className="h-12 w-12 text-primary mx-auto mb-4" />
-                    <h3 className="font-semibold mb-2">Upload PDF Resources</h3>
-                    <p className="text-sm text-muted-foreground mb-4">
-                      Add new learning materials for students
-                    </p>
-                    <Button className="w-full">Upload PDF</Button>
-                  </CardContent>
-                </Card>
-
-                <Card className="cursor-pointer hover:bg-muted/50 transition-colors">
-                  <CardContent className="p-6 text-center">
-                    <Play className="h-12 w-12 text-primary mx-auto mb-4" />
-                    <h3 className="font-semibold mb-2">Add Video Content</h3>
-                    <p className="text-sm text-muted-foreground mb-4">
-                      Upload educational videos and tutorials
-                    </p>
-                    <Button className="w-full">Add Video</Button>
-                  </CardContent>
-                </Card>
-
-                <Card className="cursor-pointer hover:bg-muted/50 transition-colors">
-                  <CardContent className="p-6 text-center">
-                    <Target className="h-12 w-12 text-primary mx-auto mb-4" />
-                    <h3 className="font-semibold mb-2">Create Problems</h3>
-                    <p className="text-sm text-muted-foreground mb-4">
-                      Design coding challenges and exercises
-                    </p>
-                    <Button className="w-full">New Problem</Button>
-                  </CardContent>
-                </Card>
-              </div>
-            </CardContent>
-          </Card>
+          <ContentManagement />
         </TabsContent>
       </Tabs>
     </div>

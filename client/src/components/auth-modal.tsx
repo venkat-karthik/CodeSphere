@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useAuth } from '@/hooks/use-auth';
+import { useAuth } from '../hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 
 interface AuthModalProps {
@@ -36,7 +36,7 @@ export function AuthModal({ isOpen, onClose, defaultMode = 'login' }: AuthModalP
     setIsLoading(true);
 
     try {
-      await login(loginForm);
+      await login(loginForm.email, loginForm.password);
       toast({
         title: 'Welcome back!',
         description: 'You have successfully logged in.',
