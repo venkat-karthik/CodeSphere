@@ -67,13 +67,7 @@ export function AuthModals({ isOpen, mode, onClose, onSwitchMode }: AuthModalsPr
         firstName: registerData.firstName,
         lastName: registerData.lastName,
         email: registerData.email,
-        role: 'student',
-        level: 1,
-        xp: 0,
-        nextLevelXP: 100,
-        streak: 0,
-        completedCourses: 0,
-        problemsSolved: 0
+        password: registerData.password,
       });
 
       if (success) {
@@ -116,16 +110,6 @@ export function AuthModals({ isOpen, mode, onClose, onSwitchMode }: AuthModalsPr
               <h2 className="text-xl font-bold mb-1 text-cs-heading">Sign In</h2>
               <p className="text-cs-body text-sm">Access your account</p>
             </div>
-
-            {/* Collapsible Demo Accounts */}
-            <details className="mb-4">
-              <summary className="cursor-pointer text-cs-primary text-sm mb-2">Show Demo Accounts</summary>
-              <div className="mt-2 bg-cs-sidebar rounded-lg p-2 border border-cs-primary/30">
-                <div className="text-xs">
-                  <LoginInstructions />
-                </div>
-              </div>
-            </details>
 
             <form onSubmit={handleLogin} className="space-y-4 mt-2">
               <div>

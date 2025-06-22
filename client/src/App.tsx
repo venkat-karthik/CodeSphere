@@ -1,12 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { AuthProvider } from './hooks/useAuth';
 import { ThemeProvider } from './contexts/ThemeContext';
-import { UserRoleProvider } from './contexts/UserRoleContext';
+import { UserRoleProvider, useUserRole } from './contexts/UserRoleContext';
 import { NotificationsProvider } from './contexts/NotificationsContext';
 import { AssignmentProvider } from './contexts/AssignmentContext';
 import { Layout } from './components/Layout';
 import { Dashboard } from './pages/Dashboard';
-import { AdminDashboard } from './pages/AdminDashboard';
 import { Roadmaps } from './pages/Roadmaps';
 import { Resources } from './pages/Resources';
 import { Videos } from './pages/Videos';
@@ -20,17 +19,26 @@ import { EnhancedProfile } from './pages/EnhancedProfile';
 import { EnhancedSettings } from './pages/EnhancedSettings';
 import { PlatformAnalytics } from './pages/PlatformAnalytics';
 import { LiveClasses } from './pages/LiveClasses';
+import { CodeCoinStore } from './pages/CodeCoinStore';
 import { Section } from './types';
 
-function App() {
-  const [currentSection, setCurrentSection] = useState<Section>('dashboard');
+function AppContent() {
+  const [currentSection, setCurrentSection] = useState<Section | null>(null);
+  const { isAdmin } = useUserRole();
+
+  useEffect(() => {
+    // Set initial section based on role
+    setCurrentSection(isAdmin ? 'admin-dashboard' : 'dashboard');
+  }, [isAdmin]);
 
   const renderSection = () => {
+    if (!currentSection) {
+      return null; // or a loading spinner
+    }
+
     switch (currentSection) {
       case 'dashboard':
         return <Dashboard onSectionChange={setCurrentSection} />;
-      case 'admin-dashboard':
-        return <AdminDashboard />;
       case 'roadmaps':
         return <Roadmaps />;
       case 'resources':
@@ -57,25 +65,33 @@ function App() {
         return <PlatformAnalytics />;
       case 'live-classes':
         return <LiveClasses />;
+      case 'store':
+        return <CodeCoinStore />;
       default:
-        return <Dashboard onSectionChange={setCurrentSection} />;
+        return isAdmin ? <PlatformAnalytics /> : <Dashboard onSectionChange={setCurrentSection} />;
     }
   };
 
   return (
+    <NotificationsProvider>
+      <AssignmentProvider>
+        <Layout 
+          currentSection={currentSection} 
+          onSectionChange={setCurrentSection}
+        >
+          {renderSection()}
+        </Layout>
+      </AssignmentProvider>
+    </NotificationsProvider>
+  );
+}
+
+function App() {
+  return (
     <ThemeProvider>
       <AuthProvider>
         <UserRoleProvider>
-          <NotificationsProvider>
-            <AssignmentProvider>
-              <Layout 
-                currentSection={currentSection} 
-                onSectionChange={setCurrentSection}
-              >
-                {renderSection()}
-              </Layout>
-            </AssignmentProvider>
-          </NotificationsProvider>
+          <AppContent />
         </UserRoleProvider>
       </AuthProvider>
     </ThemeProvider>

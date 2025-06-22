@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -16,8 +16,10 @@ import {
   TrendingUp,
   Award,
   Zap,
-  BookOpen
+  BookOpen,
+  Loader2
 } from 'lucide-react';
+import api from '@/lib/api';
 
 interface LeaderboardUser {
   id: string;
@@ -35,9 +37,31 @@ interface LeaderboardUser {
 }
 
 export function Leaderboard() {
+  const [users, setUsers] = useState<LeaderboardUser[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState('xp');
   const [searchTerm, setSearchTerm] = useState('');
   const [timeframe, setTimeframe] = useState('all-time');
+
+  useEffect(() => {
+    const fetchLeaderboardData = async () => {
+      try {
+        setLoading(true);
+        // This endpoint will need to be created on the backend
+        const response = await api.get(`/users/leaderboard?category=${selectedCategory}&timeframe=${timeframe}`);
+        setUsers(response.data);
+        setError(null);
+      } catch (err) {
+        setError('Failed to load leaderboard. Please try again later.');
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchLeaderboardData();
+  }, [selectedCategory, timeframe]);
 
   const leaderboardData: LeaderboardUser[] = [
     {
@@ -153,7 +177,8 @@ export function Leaderboard() {
     { id: 'xp', label: 'Total XP', icon: Star },
     { id: 'streak', label: 'Current Streak', icon: Flame },
     { id: 'problems', label: 'Problems Solved', icon: Target },
-    { id: 'courses', label: 'Courses Completed', icon: BookOpen }
+    { id: 'courses', label: 'Courses Completed', icon: BookOpen },
+    { id: 'this-week', label: 'This Week' }
   ];
 
   const timeframes = [
@@ -203,7 +228,7 @@ export function Leaderboard() {
   };
 
   const filteredAndSortedUsers = sortUsers(
-    leaderboardData.filter(user => 
+    (users.length > 0 ? users : leaderboardData).filter(user => 
       user.name.toLowerCase().includes(searchTerm.toLowerCase())
     ),
     selectedCategory
@@ -211,6 +236,24 @@ export function Leaderboard() {
 
   const currentUser = filteredAndSortedUsers.find(user => user.isCurrentUser);
   const topUsers = filteredAndSortedUsers.slice(0, 3);
+
+  if (loading) {
+    return (
+      <Card className="flex items-center justify-center h-96">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </Card>
+    );
+  }
+
+  if (error) {
+    return (
+      <Card className="flex items-center justify-center h-96">
+        <div className="text-center text-red-500">
+          <p>{error}</p>
+        </div>
+      </Card>
+    );
+  }
 
   return (
     <div className="space-y-4">

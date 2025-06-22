@@ -14,14 +14,17 @@ export interface User {
   learningPath?: string;
   avatar?: string;
   name?: string;
+  codeCoins?: number;
+  codeCoinsHistory?: {
+    type: 'earn' | 'spend';
+    amount: number;
+    reason: string;
+    date: string;
+  }[];
 }
 
-export interface RegisterData {
-  firstName: string;
-  lastName: string;
-  email: string;
-  password: string;
-  confirmPassword: string;
+export interface RegisterData extends Omit<User, 'id' | 'joinDate' | 'role' | 'level' | 'xp' | 'nextLevelXP' | 'streak' | 'completedCourses' | 'problemsSolved' | 'codeCoins'> {
+  password?: string;
 }
 
 export interface AuthState {
@@ -31,7 +34,7 @@ export interface AuthState {
 
 export interface AuthContextType extends AuthState {
   login: (email: string, password: string) => Promise<boolean>;
-  register: (userData: Omit<User, 'id' | 'joinDate'>) => Promise<boolean>;
+  register: (userData: RegisterData) => Promise<boolean>;
   logout: () => void;
   updateUser: (updates: Partial<User>) => void;
 }
@@ -212,7 +215,6 @@ export interface ActivityItem {
 
 export type Section = 
   | 'dashboard' 
-  | 'admin-dashboard'
   | 'roadmaps' 
   | 'resources' 
   | 'videos' 
@@ -226,7 +228,8 @@ export type Section =
   | 'profile' 
   | 'settings'
   | 'live-classes'
-  | 'analytics';
+  | 'analytics'
+  | 'store';
 
 // Live Video Conferencing Types
 export interface LiveClass {
@@ -352,4 +355,16 @@ export interface SubmissionAttachment {
   url: string;
   type: 'pdf' | 'image' | 'document' | 'other';
   size: number;
+}
+
+export interface StoreItem {
+  id: string;
+  title: string;
+  description: string;
+  price: number;
+  type: 'pdf' | 'template' | 'notes';
+}
+
+export interface Student extends User {
+  // Could add student-specific fields here later
 }

@@ -1,73 +1,67 @@
-import express, { type Request, Response, NextFunction } from "express";
-import { registerRoutes } from "./routes";
-import { setupVite, serveStatic, log } from "./vite";
-import { VideoServer } from "./videoServer";
+import express from 'express';
+import dotenv from 'dotenv';
+import cors from 'cors';
+import path from 'path';
+import connectDB from './utils/db';
+import { notFound, errorHandler } from './middlewares/error.middleware';
+
+// Route Imports
+import authRoutes from './routes/auth.routes';
+import storeRoutes from './routes/store.routes';
+import userRoutes from './routes/user.routes';
+import adminRoutes from './routes/admin.routes';
+
+// Load env vars
+dotenv.config();
+
+// Connect to database
+connectDB();
 
 const app = express();
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
 
-app.use((req, res, next) => {
-  const start = Date.now();
-  const path = req.path;
-  let capturedJsonResponse: Record<string, any> | undefined = undefined;
+// Middleware
+const isProduction = process.env.NODE_ENV === 'production';
+const allowedOrigins = [process.env.FRONTEND_URL || 'http://localhost:5173'];
 
-  const originalResJson = res.json;
-  res.json = function (bodyJson, ...args) {
-    capturedJsonResponse = bodyJson;
-    return originalResJson.apply(res, [bodyJson, ...args]);
-  };
-
-  res.on("finish", () => {
-    const duration = Date.now() - start;
-    if (path.startsWith("/api")) {
-      let logLine = `${req.method} ${path} ${res.statusCode} in ${duration}ms`;
-      if (capturedJsonResponse) {
-        logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
-      }
-
-      if (logLine.length > 80) {
-        logLine = logLine.slice(0, 79) + "…";
-      }
-
-      log(logLine);
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin) || !isProduction) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
     }
-  });
-
-  next();
-});
-
-(async () => {
-  const server = await registerRoutes(app);
-  
-  // Initialize video server for WebSocket connections
-  const videoServer = new VideoServer(server);
-  console.log("🎥 Video conferencing server initialized");
-
-  app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
-    const status = err.status || err.statusCode || 500;
-    const message = err.message || "Internal Server Error";
-
-    res.status(status).json({ message });
-    throw err;
-  });
-
-  // importantly only setup vite in development and after
-  // setting up all the other routes so the catch-all route
-  // doesn't interfere with the other routes
-  if (app.get("env") === "development") {
-    await setupVite(app, server);
-  } else {
-    serveStatic(app);
   }
+}));
+app.use(express.json());
 
-  // ALWAYS serve the app on port 5000
-  // this serves both the API and the client.
-  // It is the only port that is not firewalled.
-  const port = 5000;
-  server.listen(port, "127.0.0.1", () => {
-    log(`serving on port ${port}`);
-    console.log(`🚀 CodeSphere Platform running at: http://127.0.0.1:${port}`);
-    console.log(`🎥 Video conferencing available at: http://127.0.0.1:${port}`);
-  });
-})();
+// API Routes
+app.use('/api/auth', authRoutes);
+app.use('/api/store', storeRoutes);
+app.use('/api/user', userRoutes);
+app.use('/api/admin', adminRoutes);
+
+
+// --- Deployment ---
+if (isProduction) {
+    // Set static folder - Adjust path for new build structure
+    const clientBuildPath = path.join(__dirname, '../../../dist/client');
+    app.use(express.static(clientBuildPath));
+
+    app.get('*', (req, res) => {
+        res.sendFile(path.resolve(clientBuildPath, 'index.html'));
+    });
+} else {
+    app.get('/', (req, res) => {
+        res.send('API is running...');
+    });
+}
+// --- End Deployment ---
+
+// Error Handling Middleware
+app.use(notFound);
+app.use(errorHandler);
+
+
+const PORT = process.env.PORT || 5001;
+
+app.listen(PORT, () => console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`));

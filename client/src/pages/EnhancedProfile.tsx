@@ -35,7 +35,8 @@ import {
   Eye
 } from 'lucide-react';
 import { ProfileAchievements } from '@/components/ProfileAchievements';
-import { ProgressTracker } from '@/components/ProgressTracker';
+import { ProgressTracker } from '@/pages/ProgressTracker';
+import { useAuth } from "@/hooks/useAuth";
 
 interface Achievement {
   id: string;

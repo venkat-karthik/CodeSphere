@@ -5,9 +5,6 @@ import { Section } from '../types';
 import { Search, Bell } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { useNotifications } from '../contexts/NotificationsContext';
-import { LiveClasses } from './LiveClasses';
-import { SphereMap } from './SphereMap';
-import { CodeSandbox } from './CodeSandbox';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -92,9 +89,7 @@ export function Layout({ children, currentSection, onSectionChange }: LayoutProp
 
         {/* Page Content */}
         <div className="p-6">
-          {currentSection === 'live-classes' ? <LiveClasses /> :
-           currentSection === 'sphere-map' ? <SphereMap /> :
-           currentSection === 'sandbox' ? <CodeSandbox /> : children}
+          {children}
         </div>
       </main>
 

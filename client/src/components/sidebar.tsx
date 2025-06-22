@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useLocation } from 'wouter';
 import { 
   Home, 
@@ -18,7 +18,8 @@ import {
   Star,
   Shield,
   BarChart3,
-  Video
+  Video,
+  Store
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { useUserRole } from '../contexts/UserRoleContext';
@@ -37,6 +38,12 @@ export function Sidebar({ currentSection, onSectionChange, onAuthModalOpen }: Si
   const { isAdmin, isStudent } = useUserRole();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [, setLocation] = useLocation();
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      onSectionChange(isAdmin ? 'platform-analytics' : 'dashboard');
+    }
+  }, [isAuthenticated, isAdmin, onSectionChange]);
 
   if (!isAuthenticated) {
     return (
@@ -75,26 +82,35 @@ export function Sidebar({ currentSection, onSectionChange, onAuthModalOpen }: Si
     );
   }
 
-  const learningNavigation = [
+  const homeNavigation = [
     { id: 'dashboard' as Section, icon: Home, label: 'Dashboard' },
+  ];
+
+  const learnNavigation = [
     { id: 'roadmaps' as Section, icon: Route, label: 'Learning Roadmaps' },
-    { id: 'resources' as Section, icon: FileText, label: 'PDF Resources' },
     { id: 'videos' as Section, icon: Play, label: 'Video Library' },
     { id: 'problems' as Section, icon: Puzzle, label: 'Daily Problems' },
     { id: 'studio' as Section, icon: Code, label: 'Project Studio' },
-    { id: 'sandbox' as Section, icon: Code, label: 'App Sandbox' },
-    { id: 'mentor' as Section, icon: Bot, label: 'AI Mentor' },
-    { id: 'sphere-map' as Section, icon: Star, label: 'Sphere Map' }
   ];
 
-  const collaborationNavigation = [
+  const engageNavigation = [
     { id: 'community' as Section, icon: Users, label: 'Community Lounge' },
-    { id: 'live-classes' as Section, icon: Video, label: 'Live Classes' }
+    { id: 'live-classes' as Section, icon: Video, label: 'Live Classes' },
   ];
 
-  const analyticsNavigation = [
-    { id: 'platform-analytics' as Section, icon: BarChart3, label: 'Analytics Dashboard' },
-    ...(isAdmin ? [{ id: 'admin-dashboard' as Section, icon: Shield, label: 'Admin Dashboard' }] : [])
+  const toolsNavigation = [
+    { id: 'mentor' as Section, icon: Bot, label: 'AI Mentor' },
+    { id: 'sandbox' as Section, icon: Code, label: 'App Sandbox' },
+    { id: 'sphere-map' as Section, icon: Star, label: 'Sphere Map' },
+  ];
+  
+  const storeNavigation = [
+    { id: 'store' as Section, icon: Store, label: 'CodeCoin Store' },
+    { id: 'resources' as Section, icon: FileText, label: 'PDF Resources' },
+  ];
+
+  const adminNavigation = [
+    { id: 'platform-analytics' as Section, icon: BarChart3, label: 'Admin Panel' },
   ];
 
   const profileNavigation = [
@@ -152,31 +168,39 @@ export function Sidebar({ currentSection, onSectionChange, onAuthModalOpen }: Si
                 </div>
                 <div className="flex-1">
                   <div className="font-semibold">{user.firstName} {user.lastName}</div>
-                  <div className="text-sm text-muted-foreground">Level {user.level}</div>
+                  <div className="text-sm text-muted-foreground">{isAdmin ? 'Administrator' : `Level ${user.level}`}</div>
                 </div>
               </div>
               
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm text-muted-foreground">
-                  <span>XP Progress</span>
-                  <span>{user.xp}/{user.nextLevelXP}</span>
-                </div>
-                <div className="w-full bg-muted rounded-full h-2">
-                  <div 
-                    className="progress-bar h-2 rounded-full transition-all duration-300" 
-                    style={{ width: `${xpProgress}%` }}
-                  />
-                </div>
-                <div className="flex justify-between text-sm">
-                  <div className="flex items-center space-x-1">
-                    <Flame className="h-4 w-4 text-orange-500" />
-                    <span className="text-orange-500 font-semibold">{user.streak}</span>
+              {!isAdmin && (
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm text-muted-foreground">
+                    <span>XP Progress</span>
+                    <span>{user.xp}/{user.nextLevelXP}</span>
                   </div>
-                  <div className="text-muted-foreground">
-                    Courses: {user.completedCourses}
+                  <div className="w-full bg-muted rounded-full h-2">
+                    <div 
+                      className="progress-bar h-2 rounded-full transition-all duration-300" 
+                      style={{ width: `${xpProgress}%` }}
+                    />
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <div className="flex items-center space-x-1">
+                      <Flame className="h-4 w-4 text-orange-500" />
+                      <span className="text-orange-500 font-semibold">{user.streak}</span>
+                    </div>
+                    <div className="flex items-center space-x-1">
+                      <img src="/coin.svg" alt="CodeCoin" className="h-4 w-4" />
+                      <span className="text-yellow-500 font-semibold">
+                        {user.codeCoins || 0}
+                      </span>
+                    </div>
+                    <div className="text-muted-foreground">
+                      Courses: {user.completedCourses}
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
             </div>
           ) : (
             <div className="bg-card/50 rounded-xl p-4 mb-6 text-center">
@@ -196,49 +220,111 @@ export function Sidebar({ currentSection, onSectionChange, onAuthModalOpen }: Si
 
           {/* Navigation Groups */}
           <div className="space-y-6">
-            <div>
-              <div className="px-6 pb-2 text-xs text-muted-foreground font-semibold uppercase tracking-wider">Learning</div>
-              <nav className="space-y-2">
-                {learningNavigation.map((item) => (
-                  <button
-                    key={item.id}
-                    onClick={() => onSectionChange(item.id)}
-                    className={`sidebar-item w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left ${
-                      currentSection === item.id
-                        ? 'bg-primary text-primary-foreground'
-                        : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
-                    }`}
-                  >
-                    <item.icon className="h-5 w-5 flex-shrink-0" />
-                    <span>{item.label}</span>
-                  </button>
-                ))}
-              </nav>
-            </div>
-            <div>
-              <div className="px-6 pb-2 text-xs text-muted-foreground font-semibold uppercase tracking-wider">Collaboration</div>
-              <nav className="space-y-2">
-                {collaborationNavigation.map((item) => (
-                  <button
-                    key={item.id}
-                    onClick={() => onSectionChange(item.id)}
-                    className={`sidebar-item w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left ${
-                      currentSection === item.id
-                        ? 'bg-primary text-primary-foreground'
-                        : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
-                    }`}
-                  >
-                    <item.icon className="h-5 w-5 flex-shrink-0" />
-                    <span>{item.label}</span>
-                  </button>
-                ))}
-              </nav>
-            </div>
-            {analyticsNavigation.length > 0 && (
+            {isStudent && (
+              <>
+                <div>
+                  <div className="px-6 pb-2 text-xs text-muted-foreground font-semibold uppercase tracking-wider">Home</div>
+                  <nav className="space-y-2">
+                    {homeNavigation.map((item) => (
+                      <button
+                        key={item.id}
+                        onClick={() => onSectionChange(item.id)}
+                        className={`sidebar-item w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left ${
+                          currentSection === item.id
+                            ? 'bg-primary text-primary-foreground'
+                            : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
+                        }`}
+                      >
+                        <item.icon className="h-5 w-5 flex-shrink-0" />
+                        <span>{item.label}</span>
+                      </button>
+                    ))}
+                  </nav>
+                </div>
+                <div>
+                  <div className="px-6 pb-2 text-xs text-muted-foreground font-semibold uppercase tracking-wider">Learn</div>
+                  <nav className="space-y-2">
+                    {learnNavigation.map((item) => (
+                      <button
+                        key={item.id}
+                        onClick={() => onSectionChange(item.id)}
+                        className={`sidebar-item w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left ${
+                          currentSection === item.id
+                            ? 'bg-primary text-primary-foreground'
+                            : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
+                        }`}
+                      >
+                        <item.icon className="h-5 w-5 flex-shrink-0" />
+                        <span>{item.label}</span>
+                      </button>
+                    ))}
+                  </nav>
+                </div>
+                <div>
+                  <div className="px-6 pb-2 text-xs text-muted-foreground font-semibold uppercase tracking-wider">Engage</div>
+                  <nav className="space-y-2">
+                    {engageNavigation.map((item) => (
+                      <button
+                        key={item.id}
+                        onClick={() => onSectionChange(item.id)}
+                        className={`sidebar-item w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left ${
+                          currentSection === item.id
+                            ? 'bg-primary text-primary-foreground'
+                            : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
+                        }`}
+                      >
+                        <item.icon className="h-5 w-5 flex-shrink-0" />
+                        <span>{item.label}</span>
+                      </button>
+                    ))}
+                  </nav>
+                </div>
+                 <div>
+                  <div className="px-6 pb-2 text-xs text-muted-foreground font-semibold uppercase tracking-wider">Tools</div>
+                  <nav className="space-y-2">
+                    {toolsNavigation.map((item) => (
+                      <button
+                        key={item.id}
+                        onClick={() => onSectionChange(item.id)}
+                        className={`sidebar-item w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left ${
+                          currentSection === item.id
+                            ? 'bg-primary text-primary-foreground'
+                            : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
+                        }`}
+                      >
+                        <item.icon className="h-5 w-5 flex-shrink-0" />
+                        <span>{item.label}</span>
+                      </button>
+                    ))}
+                  </nav>
+                </div>
+                 <div>
+                  <div className="px-6 pb-2 text-xs text-muted-foreground font-semibold uppercase tracking-wider">Store</div>
+                  <nav className="space-y-2">
+                    {storeNavigation.map((item) => (
+                      <button
+                        key={item.id}
+                        onClick={() => onSectionChange(item.id)}
+                        className={`sidebar-item w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left ${
+                          currentSection === item.id
+                            ? 'bg-primary text-primary-foreground'
+                            : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
+                        }`}
+                      >
+                        <item.icon className="h-5 w-5 flex-shrink-0" />
+                        <span>{item.label}</span>
+                      </button>
+                    ))}
+                  </nav>
+                </div>
+              </>
+            )}
+
+            {isAdmin && (
               <div>
-                <div className="px-6 pb-2 text-xs text-muted-foreground font-semibold uppercase tracking-wider">Analytics & Admin</div>
+                <div className="px-6 pb-2 text-xs text-muted-foreground font-semibold uppercase tracking-wider">Admin</div>
                 <nav className="space-y-2">
-                  {analyticsNavigation.map((item) => (
+                  {adminNavigation.map((item) => (
                     <button
                       key={item.id}
                       onClick={() => onSectionChange(item.id)}
@@ -255,8 +341,9 @@ export function Sidebar({ currentSection, onSectionChange, onAuthModalOpen }: Si
                 </nav>
               </div>
             )}
+            
             <div>
-              <div className="px-6 pb-2 text-xs text-muted-foreground font-semibold uppercase tracking-wider">Profile & Settings</div>
+              <div className="px-6 pb-2 text-xs text-muted-foreground font-semibold uppercase tracking-wider">Account</div>
               <nav className="space-y-2">
                 {profileNavigation.map((item) => (
                   <button
@@ -272,44 +359,19 @@ export function Sidebar({ currentSection, onSectionChange, onAuthModalOpen }: Si
                     <span>{item.label}</span>
                   </button>
                 ))}
+                <button
+                  onClick={logout}
+                  className="sidebar-item w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                >
+                  <LogOut className="h-5 w-5 flex-shrink-0" />
+                  <span>Logout</span>
+                </button>
               </nav>
             </div>
           </div>
-
-          {/* Theme Toggle */}
-          <div className="flex justify-center mb-4">
-            <ThemeToggle />
-          </div>
-
-          {/* Auth Buttons / Logout */}
-          <div className="mt-8">
-            {isAuthenticated ? (
-              <Button
-                onClick={logout}
-                variant="destructive"
-                className="w-full"
-              >
-                <LogOut className="h-4 w-4 mr-2" />
-                Logout
-              </Button>
-            ) : (
-              <div className="space-y-2">
-                <Button
-                  onClick={() => onAuthModalOpen('login')}
-                  variant="outline"
-                  className="w-full"
-                >
-                  Login
-                </Button>
-                <Button
-                  onClick={() => onAuthModalOpen('register')}
-                  className="w-full"
-                >
-                  Sign Up
-                </Button>
-              </div>
-            )}
-          </div>
+        </div>
+        <div className="p-4 mt-auto">
+          <ThemeToggle />
         </div>
       </div>
 
